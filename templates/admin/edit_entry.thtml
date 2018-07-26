@@ -1,0 +1,113 @@
+<div class="uk-panel uk-panel-box">
+	<form id="faqadmin" class="uk-form " action="{site_admin_url}/plugins/faq/index.php" method="post">
+		<input type="hidden" name="faq_id" value="{row_faqid}">
+		<input type="hidden" name="type" value="faq">
+		<input type="hidden" name="src" value="{src}">
+		<input type="hidden" name="{sec_token_name}" value="{sec_token}">
+
+		<fieldset class="uk-margin-top">
+			<legend>{lang_faq}</legend>
+
+			<div class="uk-form-row">
+				<div class="uk-grid">
+					<div class="uk-width-medium-1-2">
+						<label class="uk-form-label">{lang_category}</label>
+						<div class="uk-form-controls">
+							<select name="cat_id">
+								{category_select}
+							</select>
+						</div>
+					</div>
+
+					<div class="uk-width-medium-1-2">
+						<label class="uk-form-label">
+							{lang_published}
+						</label>
+						<div class="uk-form-controls">
+							<input type="checkbox" name="published" id="published" {publish_checked}>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="uk-form-row">
+				<label class="uk-form-label">{lang_question}</label>
+				<div class="uk-form-controls">
+					<input class="required uk-form-width-xlarge" type="text" name="question" size="80" value="{row_question}">
+				</div>
+			</div>
+
+			<div class="uk-form-row">
+				<label class="uk-form-label">{lang_answer}</label>
+				<div class="uk-form-controls">
+					<textarea class="uk-form-width-xlarge required" id="answer" name="answer" rows="18" cols="90">{row_answer}</textarea>
+				</div>
+			</div>
+
+
+		</fieldset>
+
+		<div class="uk-form-row uk-text-center uk-margin-top">
+
+			<button class="uk-button uk-button-primary" type="submit" name="save" value="x">{lang_save}</button>
+			<button class="uk-button cancel" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+{!if delete_option}
+			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
+{!endif}
+
+		</div>
+	</form>
+</div>
+<script>
+	$( "#faqadmin" ).validate({
+		errorElement: "div",
+		errorClass: "uk-text-danger",
+		rules: {
+			testurl: {
+				url: true
+			},
+			errorPlacement: function(error, element) {
+				error.insertAfter(element);
+			}
+		}
+	});
+</script>
+<script src="{site_url}/ckeditor/ckeditor.js" ></script >
+<script >
+var site_url = "{site_url}";
+var answer;
+function loadEditor(id) {
+		var instance = CKEDITOR.replace( id, {
+			contentsCss: '{css_url}',
+			bodyClass: 'tm-container faq',
+			extraPlugins: 'mediagallery,youtube2',
+			{styleset}
+			height: 500,
+{!if mbmissing} {# check for mbstring extension in PHP #}
+			filebrowserBrowseUrl :  '',
+			filebrowserImageBrowseUrl : '',
+{!endif}
+			language: '{iso_lang}',
+			allowedContent: {
+			    $1: {
+			        elements: CKEDITOR.dtd,
+			        attributes: true,
+			        styles: true,
+			        classes: true
+			    }
+			},
+			disallowedContent: 'table[cellspacing,cellpadding,border]'
+		} );
+		instance.config.protectedSource.push(/<i[^>]*><\/i>/g);
+		return instance;
+}
+window.onload = function() {
+    answer = loadEditor('answer');
+};
+function won (id) {
+    answer = loadEditor('answer');
+}
+function woff (id) {
+    answer.destroy();
+}
+</script>

@@ -1,0 +1,19 @@
+.faq pre {
+	background: #beedff;
+}
+.faq-title.uk-accordion-title {
+	background:transparent !important;
+	border:0;
+	border-bottom: 1px solid #ddd !important;
+	font-weight:400;
+}
+.faq-answer {
+	font-size:16px;
+	line-height:1.5;
+	background: #eee;
+	border-radius:4px;
+	margin:10px;
+}
+.faq {
+	background: #efefef;
+}

@@ -1,0 +1,36 @@
+<h1 class="uk-margin-small-top">Frequently Asked Questions about glFusion</h1>
+
+<div class="uk-grid">
+<!-- BEGIN category -->
+	<div class="uk-width-medium-1-3">
+		<div class="faq-titles" style="margin-top:10px;">
+		<h2 class="uk-text-bold uk-margin">
+			{category_title}
+{!if add_item_link}
+			<a class="uk-text-small" href="{add_item_link}" title="{lang_create_new_faq}"><i class="uk-icon uk-icon-plus"></i></a>
+{!endif}
+		</h2>
+{#
+		<div>
+			{description}
+		</div>
+#}
+		<ul class="uk-list">
+
+		<!-- BEGIN questions -->
+{!if question}
+			<li style="margin-bottom:10px;">
+				<a href="{site_url}/faq/index.php?id={id}">{question}</a>
+			</li>
+{!endif}
+		<!-- END questions -->
+
+{!if lang_no_faqs}
+			<li style="margin-bottom:10px;"><span class="uk-text-danger">{lang_no_faqs}</span></li>
+{!endif}
+		</ul>
+	</div>
+	</div>
+<!-- END category -->
+</div>
+
