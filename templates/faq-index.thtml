@@ -6,7 +6,7 @@
 <!-- BEGIN category -->
 	<li>
 		<div class="faq-titles" style="margin-top:10px;">
-			<h2 class="uk-text-bold uk-margin">
+			<h2 class="uk-text-bold uk-margin" style="line-height:1.2;">
 				{category_title}
 				{!if add_item_link}
 				<a class="uk-text-small" href="{add_item_link}" title="{lang_create_new_faq}"><i class="uk-icon uk-icon-plus"></i></a>
