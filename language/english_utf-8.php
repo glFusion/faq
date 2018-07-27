@@ -20,7 +20,6 @@ $LANG_FAQ = array (
     'plugin_admin'		=> 'FAQ Admin',
     'access_denied'     => 'Access Denied',
     'access_denied_msg' => 'You are not authorized to view this Page.  Your user name and IP have been recorded.',
-
     'admin'		            => 'FAQ Admin',
     'admin_help'            => 'FAQ administration. Allows you to create, edit and delete FAQs and FAQ Categories.',
     'answer'                => 'Answer',
@@ -38,6 +37,7 @@ $LANG_FAQ = array (
     'delete_category_confirm'    => 'Are you sure you want to delete the checked Categories? ALL FAQs IN THE CATEGORY WILL ALSO BE DELETED!',
     'delete_checked'        => 'Delete Checked',
     'delete_confirm'        => 'Are you sure you want to delete the checked FAQs?',
+    'desc_faq'              => '[faq] auto tag creates a link to the FAQ entry',
     'description'           => 'Description',
     'display_after'         => 'Display After',
     'draft'                 => 'Draft',
@@ -65,7 +65,7 @@ $LANG_FAQ = array (
     'owner'                 => 'Category Owner',
     'permissions'           => 'Permissions',
     'question'              => 'Question',
-    'save'				    => 'Save',
+    'save'		            => 'Save',
     'sort_order'            => 'Order',
     'thank_you'             => 'Thank you for your feedback!',
     'title'                 => 'Title',
@@ -79,14 +79,14 @@ $LANG_configsections['faq'] = array(
 );
 
 $LANG_confignames['faq'] = array(
-    'faq_title'           => 'FAQ Main Title',
     'allowed_html'        => 'Allowed HTML in Answers',
+    'default_permissions_category' => 'Default Category Permissions',
     'displayblocks'       => 'Display Blocks',
-    'question_sort_field' => 'FAQ Sort Field',
+    'faq_title'           => 'FAQ Main Title',
     'question_sort_dir'   => 'FAQ Sort Direction',
+    'question_sort_field' => 'FAQ Sort Field',
     'whatsnew_enabled'    => 'Include in What\'s New Block',
     'whatsnew_interval'   => 'What\'s New Interval (Days)',
-    'default_permissions_category' => 'Default Category Permissions',
 );
 
 $LANG_configsubgroups['faq'] = array(
