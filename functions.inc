@@ -143,32 +143,6 @@ function plugin_getadminoption_faq()
 }
 
 /**
-* Loads CSS files
-*
-* Uses the Plugin class to return data required by moderation.php to list
-* plugin objects that need to be moderated.
-*
-* @param        string token The
-* @return       Plugin       return HTML
-*
-*/
-function plugin_getheadercss_faq() {
-    global $_CONF;
-
-    $styles = array();
-
-    if ( @file_exists($_CONF['path_layout'].'plugins/faq/style.css') ) {
-        $styles[] = $_CONF['path_layout'].'plugins/faq/style.css';
-    } else if ( @file_exists($_CONF['path'] . 'plugins/faq/custom/style.css') ) {
-        $styles[] = $_CONF['path'] . 'plugins/faq/css/custom/style.css';
-    } else {
-        $styles[] = $_CONF['path'] . 'plugins/faq/style.css';
-    }
-    return($styles);
-}
-
-
-/**
 *   Get the URL to the configuration help file.
 *
 *   @param  string  $option     Config option selected
@@ -286,6 +260,78 @@ function plugin_getwhatsnew_faq() {
         $retval = array($LANG_FAQ['plugin_name'],sprintf($LANG_FAQ['whatsnew_period'],$_FAQ_CONF['whatsnew_interval']),$items);
     }
     return $retval;
+}
+
+/**
+  * API function provides faq: auto tag
+*/
+function plugin_autotags_faq($op, $content = '', $autotag = '')
+{
+    global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_FAQ;
+
+    if ($op == 'tagname' ) {
+        return array('faq');
+    } else if ($op == 'tagusage') {
+        $tagUsage = array(
+            array('namespace' => 'faq','usage' => 'answer')
+        );
+        return $tagUsage;
+    } else if ($op == 'desc' ) {
+        switch ($content) {
+            case 'faq' :
+                return $LANG_FAQ['desc_faq'];
+                break;
+            default :
+                return '';
+                break;
+        }
+    } else if ($op == 'parse') {
+        if (($autotag['tag'] == 'faq')) {
+            $target = '';
+            $target_window = '';
+            $skip = 0;
+            $autotag['parm2'] = str_replace("&nbsp;",' ',$autotag['parm2']);
+            $faq_id = (int) COM_applyFilter($autotag['parm1'],true);
+            $faqData = plugin_getiteminfo_faq($faq_id, 'url,title');
+            if (count($faqData) == 2) {
+                $px = explode (' ', trim ($autotag['parm2']));
+                if (is_array ($px)) {
+                    foreach ($px as $part) {
+                        if (substr ($part, 0, 7) == 'target:') {
+                            $a = explode (':', $part);
+                            $target_window = $a[1];
+                            $skip++;
+                        } else {
+                            break;
+                        }
+                    }
+                    if ($skip != 0) {
+                        if (count ($px) > $skip) {
+                            for ($i = 0; $i < $skip; $i++) {
+                                array_shift ($px);
+                            }
+                            $caption = trim (implode (' ', $px));
+                        } else {
+                            $caption = $faqData['title'];
+                        }
+                    } else {
+                        $caption = $faqData['title'];
+                    }
+                } else {
+                    $caption = trim ($autotag['parm2']);
+                }
+                if ($target_window != '') {
+                    $target = 'target="'.$target_window.'"';
+                }
+
+                $link = '<a href="' . $faqData['url'] . '" ' . $target . ' >' . $caption . '</a>';
+                $content = str_replace ($autotag['tagstr'], $link, $content);
+            }
+        }
+        return $content;
+    }
+    return;
+
 }
 
 /**
