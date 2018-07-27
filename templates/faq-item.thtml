@@ -53,11 +53,11 @@
 					type: "yes",
 				},
 				success: function(result) {
-					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', { timeout: 1000,pos:'top-center'});
+//					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', { timeout: 1000,pos:'top-center'});
 					$("#helpful_yes").removeAttr('onclick');
 					$("#helpful_yes").attr("disabled", "disabled");
 					$("#helpful_no").attr("disabled", "disabled");
-					$("#faq-feedback").text('{lang_thank_you}');
+					$("#faq-feedback").html('<span class="uk-text-large">{lang_thank_you}</span>');
 				}
 			});
 		});
@@ -71,11 +71,11 @@
 					type: "no",
 				},
 				success: function(result) {
-					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', {timeout: 1000,pos:'top-center'});
+//					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', {timeout: 1000,pos:'top-center'});
 					$("#helpful_yes").removeAttr('onclick');
 					$("#helpful_yes").attr("disabled", "disabled");
 					$("#helpful_no").attr("disabled", "disabled");
-					$("#faq-feedback").text('{lang_thank_you}');
+					$("#faq-feedback").html('<span class="uk-text-large">{lang_thank_you}</span>');
 				}
 			});
 		});
