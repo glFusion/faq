@@ -289,6 +289,10 @@ function saveFaq()
     CACHE_remove_instance('menu');
     CACHE_remove_instance('whatsnew');
 
+    SEC_setCookie ($_CONF['cookie_name'].'adveditor', 'exired',
+                    time() - 3600, $_CONF['cookie_path'],
+                    $_CONF['cookiedomain'], $_CONF['cookiesecure'],false);
+
     if (isset($_POST['src']) && $_POST['src'] == 'faq') {
         echo COM_refresh($_CONF['site_url'].'/faq/index.php?id='.(int)$faq_id);
     }
@@ -298,7 +302,7 @@ function saveFaq()
 
 function editFaq($mode,$faq_id='',$cat_id=0)
 {
-    global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_FAQ;
+    global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_FAQ, $LANG_ADMIN;
 
     $retval = '';
     $display = '';
@@ -315,6 +319,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_draft'        => $LANG_FAQ['draft'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
+        'lang_timeout'      => $LANG_ADMIN['timeout_msg'],
         'visual_editor'     => 'Visual',
         'html_editor'       => 'HTML',
     ));
@@ -399,6 +404,10 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $T->set_var ('cancel_option', '<input type="submit" value="' . $LANG_FAQ['cancel'] . '" name="mode">');
         $T->set_var('lang_cancel',$LANG_FAQ['cancel']);
     }
+
+    SEC_setCookie ($_CONF['cookie_name'].'adveditor', SEC_createTokenGeneral('advancededitor'),
+                    time() + 1200, $_CONF['cookie_path'],
+                    $_CONF['cookiedomain'], $_CONF['cookiesecure'],false);
 
     $T->parse('output', 'form');
     $retval .= $T->finish($T->get_var('output'));

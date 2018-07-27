@@ -1,6 +1,5 @@
 {# begin {templatelocation} #}
 <script src="{site_url}/ckeditor/ckeditor.js" ></script >
-
 <div class="uk-panel uk-panel-box">
 	<form id="faqadmin" class="uk-form " action="{site_admin_url}/plugins/faq/index.php" method="post">
 		<input type="hidden" name="faq_id" value="{row_faqid}">
@@ -55,9 +54,9 @@
 		<div class="uk-form-row uk-text-left uk-margin-top">
 			<button class="uk-button uk-button-primary" type="submit" name="save" value="x">{lang_save}</button>
 			<button class="uk-button cancel" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
-{!if delete_option}
+			{!if delete_option}
 			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
-{!endif}
+			{!endif}
 		</div>
 	</form>
 </div>
@@ -76,40 +75,44 @@
 	});
 </script>
 <script >
-var site_url = "{site_url}";
-var answer;
-function loadEditor(id) {
+	var editor_type = 'faqeditor';
+	var lang_timer  = "{lang_timeout}";
+	var lastActivity = 0;
+	var site_url = "{site_url}";
+	var answer;
+	function loadEditor(id) {
 		var instance = CKEDITOR.replace( id, {
 			contentsCss: '{css_url}',
 			bodyClass: 'tm-container faq',
 			extraPlugins: 'mediagallery,youtube2',
 			{styleset}
 			height: 500,
-{!if mbmissing} {# check for mbstring extension in PHP #}
+			{!if mbmissing} {# check for mbstring extension in PHP #}
 			filebrowserBrowseUrl :  '',
 			filebrowserImageBrowseUrl : '',
-{!endif}
+			{!endif}
 			language: '{iso_lang}',
 			protectedSource:[/\[code\][\s\S]*\[\/code\]/g],
 
 			allowedContent: {
-			    $1: {
-			        elements: CKEDITOR.dtd,
-			        attributes: true,
-			        styles: true,
-			        classes: true
-			    }
+				$1: {
+					elements: CKEDITOR.dtd,
+					attributes: true,
+					styles: true,
+					classes: true
+				}
 			},
 			disallowedContent: 'table[cellspacing,cellpadding,border]'
 		} );
 		instance.config.protectedSource.push(/<i[^>]*><\/i>/g);
 		return instance;
-}
-function won (id) {
-    answer = loadEditor('answer');
-}
-function woff (id) {
-    answer.destroy();
-}
+	}
+	function won (id) {
+		answer = loadEditor('answer');
+	}
+	function woff (id) {
+		answer.destroy();
+	}
 </script>
+<script src="{site_url}/javascript/activitytimer.js"></script>
 {# end {templatelocation} #}
