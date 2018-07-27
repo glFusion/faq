@@ -37,6 +37,22 @@ if (file_exists ($langfile)) {
 */
 require_once $_CONF['path'] . 'plugins/faq/faq.php';
 
+if ( !isset($_FAQ_CONF['displayblocks'])) $_FAQ_CONF['displayblocks'] = 'menu';
+
+switch( $_FAQ_CONF['displayblocks'] ) {
+    case 0 : // left only
+    case 2 :
+        $_FAQ_CONF['menu'] = 'menu';
+        break;
+    case 1 : // right only
+    case 3 :
+        $_FAQ_CONF['menu'] = 'none';
+        break;
+    default :
+        $_FAQ_CONF['menu'] = 'menu';
+        break;
+}
+
 /**
 * Returns the items for this plugin that should appear on the main menu
 *
@@ -117,186 +133,9 @@ function plugin_getadminoption_faq()
         return array(
             $LANG_FAQ['plugin_name'],
             $_CONF['site_admin_url'] . '/plugins/faq/index.php',
-            DB_count($_TABLES['faq_questions'],'published',1)
+            DB_count($_TABLES['faq_questions'],'draft',0)
         );
     }
-}
-
-/**
-* Counts the items that are submitted
-*
-* @return   int     number of items in submission queue
-*
-*/
-function plugin_submissioncount_faq()
-{
-    global $_TABLES;
-
-    $retval = 0;
-
-    $retval = DB_count ($_TABLES['faq_questions'],'published',0);
-
-    return $retval;
-}
-
-/**
-* returns list of moderation values
-*
-* The array returned contains (in order): the row 'id' label, main plugin
-* table, moderation fields (comma seperated), and plugin submission table
-*
-* @return       array        Returns array of useful moderation values
-*
-*/
-function plugin_moderationvalues_faq()
-{
-    global $_TABLES;
-
-    return array (
-        'id',
-        $_TABLES['faq_questions'],
-        "id,published",
-        ''
-    );
-}
-
-/**
-* Performs plugin exclusive work for items approved by moderation
-*
-* While moderation.php handles the actual move from mediagallery submission
-* to mediagallery tables, within the function we handle all other approval
-* relate tasks
-*
-* @param      string       $id      Identifying string
-* @return     string       Any wanted HTML output
-*
-*/
-function plugin_moderationapprove_faq($id)
-{
-    global $_CONF, $_TABLES, $LANG_FAQ;
-
-    if ( (int) $id <= 0 ) return '';
-
-    $sql = "UPDATE {$_TABLES['faq_questions']} SET published=0 WHERE id=".(int) $id;
-    DB_query($sql);
-
-    PLG_itemSaved($id,'faq');
-    CACHE_remove_instance('menu');
-    COM_setMsg($LANG_FAQ['submission_mod_approved'],'warning');
-
-    return '';
-}
-
-
-/**
-* Performs plugin exclusive work for items deleted by moderation
-*
-* While moderation.php handles the actual removal from mediagallery submission
-* table, within this function we handle all other deletion
-* relate tasks
-*
-* @param      string       $id      Identifying string
-* @return     string       Any wanted HTML output
-*
-*/
-function plugin_moderationdelete_faq($id)
-{
-    global $_CONF, $_TABLES;
-
-    if ( (int) $id <= 0 ) return '';
-
-    $sql = "DELETE FROM {$_TABLES['faq']} WHERE id=".(int) $id . " AND queued=1";
-    DB_query($sql);
-    PLG_itemDeleted($id, 'faq');
-    CACHE_remove_instance('menu');
-    return;
-}
-
-/**
-* show files for moderation on submissions page
-*
-* Uses the Plugin class to return data required by moderation.php to list
-* plugin objects that need to be moderated.
-*
-* @param        string token The
-* @return       Plugin       return HTML
-*
-*/
-function plugin_itemlist_faq($token)
-{
-    global $_CONF, $_TABLES, $_USER, $LANG_FAQ;
-    global $LANG01, $LANG24, $LANG29, $LANG_ADMIN, $_IMAGE_TYPE;
-
-    $retval = '';
-    $key='media_id';
-
-    if ( COM_isAnonUser() ) {
-        $uid = 1;
-    } else {
-        $uid = $_USER['uid'];
-    }
-
-    $sql = "SELECT * FROM {$_TABLES['faq']} WHERE queued = 1";
-
-    $result = DB_query($sql);
-    $nrows = DB_numRows($result);
-
-    if ( $nrows == 0 ) return;
-
-    $data_arr = array();
-    for ($i = 0; $i < $nrows; $i++) {
-        $A = DB_fetchArray($result);
-        $A['edit'] = 'edit';
-        $A['_type_']  = 'faq';
-        $A['_key_']   = 'id';      // name of key/id field
-        $data_arr[$i] = $A;     // push row data into array
-    }
-
-    $header_arr = array(      // display 'text' and use table field 'field'
-        array('text' => $LANG_ADMIN['edit'], 'field' => 'testid', 'align' => 'center', 'width' => '25px'),
-        array('text' => $LANG_FAQ['client'], 'field' => 'clientname'),
-        array('text' => $LANG_FAQ['company'], 'field' => 'company'),
-        array('text' => $LANG_FAQ['tstdate'], 'field' => 'tst_date', 'align' => 'center', 'width' => '15%'),
-        array('text' => $LANG_FAQ['answer'],'field'=>'text_full','align' => 'center'),
-        array('text' => $LANG29[1], 'field' => 'approve', 'align' => 'center', 'width' => '35px'),
-        array('text' => $LANG_ADMIN['delete'], 'field' => 'delete', 'align' => 'center', 'width' => '35px')
-    );
-
-    $text_arr = array('has_menu'    => false,
-                      'title'       => $LANG_FAQ['submissions'],
-                      'help_url'    => '',
-                      'no_data'     => $LANG29[39],
-                      'form_url'    => "{$_CONF['site_admin_url']}/moderation.php"
-    );
-
-    $actions = '<input name="approve" type="image" src="'
-        . $_CONF['layout_url'] . '/images/admin/accept.' . $_IMAGE_TYPE
-        . '" style="vertical-align:bottom;" title="' . $LANG29[44]
-        . '" onclick="return confirm(\'' . $LANG29[45] . '\');"'
-        . '/>&nbsp;' . $LANG29[1];
-    $actions .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-    $actions .= '<input name="delbutton" type="image" src="'
-        . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
-        . '" style="vertical-align:text-bottom;" title="' . $LANG01[124]
-        . '" onclick="return confirm(\'' . $LANG01[125] . '\');"'
-        . '/>&nbsp;' . $LANG_ADMIN['delete'];
-
-    $options = array('chkselect' => true,
-                     'chkfield' => 'id',
-                     'chkname' => 'selitem',
-                     'chkminimum' => 0,
-                     'chkall' => true,
-                     'chkactions' => $actions,
-                     );
-
-    $form_arr['bottom'] = '<input type="hidden" name="type" value="faq"/>' . LB
-            . '<input type="hidden" name="' . CSRF_TOKEN . '" value="' . $token . '"/>' . LB
-            . '<input type="hidden" name="moderation" value="x"/>' . LB
-            . '<input type="hidden" name="count" value="' . $nrows . '"/>';
-
-    $retval .= ADMIN_simpleList('_faq_getListField', $header_arr,
-                              $text_arr, $data_arr, $options, $form_arr, $token);
-    return $retval;
 }
 
 /**
@@ -383,12 +222,18 @@ function plugin_dopluginsearch_faq($query, $datestart, $dateend, $topic, $type, 
 
     $query = trim(DB_escapeString(htmlspecialchars($query)));
 
-    $sql = " SELECT id AS id, answer AS description,answer,question,UNIX_TIMESTAMP(last_updated) AS date, question AS title, hits, CONCAT('/faq/index.php?id=',id) AS url ";
-    $sql .= "FROM {$_TABLES['faq_questions']} ";
-    $sql .= "WHERE published=1 ";
+    $permSQL = COM_getPermSql('AND');
 
-    $search = new SearchCriteria('faq', 'FAQ');
-    $columns = array('answer');
+    $sql = " SELECT id AS id, answer AS description,answer,question,UNIX_TIMESTAMP(a.last_updated) AS date, question AS title, hits, owner_uid AS uid,CONCAT('/faq/index.php?id=',id) AS url ";
+    $sql .= "FROM {$_TABLES['faq_questions']} AS a LEFT JOIN {$_TABLES['faq_categories']} AS c ON a.cat_id=c.cat_id ";
+    $sql .= " WHERE draft=0 " . $permSQL;
+
+    if (!empty ($author)) {
+        $sql .= " AND (owner_uid = '$author') ";
+    }
+
+    $search = new SearchCriteria('faq', $LANG_FAQ['plugin_name']);
+    $columns = array('question','answer');
     $sql .= $search->getDateRangeSQL('AND', '(UNIX_TIMESTAMP(last_updated))', $datestart, $dateend);
     list($sql,$ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
     $search->setSQL($sql);
@@ -398,6 +243,39 @@ function plugin_dopluginsearch_faq($query, $datestart, $dateend, $topic, $type, 
     return $search;
 }
 
+
+/**
+  * API function provides the content of our "What's New" feed
+*/
+function plugin_getwhatsnew_faq() {
+    global $_TABLES, $_CONF, $_FAQ_CONF, $LANG_FAQ, $LANG01;
+
+    $retval = '';
+
+    if ($_FAQ_CONF['whatsnew_enabled'] == 0 ) {
+        return $retval;
+    }
+
+    $items = array();
+
+    $sql =  "SELECT * FROM {$_TABLES['faq_questions']} AS a ";
+    $sql .= "LEFT JOIN {$_TABLES['faq_categories']} AS c ON a.cat_id=c.cat_id ";
+    $sql .= "WHERE a.last_updated >= DATE_SUB('".$_CONF['_now']->toMySQL(true)."', INTERVAL ".$_FAQ_CONF['whatsnew_interval']." DAY ) ";
+    $sql .= COM_getPermSql ('AND');
+    $sql .= "AND draft=0 ORDER BY a.last_updated DESC LIMIT 15 ";
+
+    $result = DB_query($sql);
+    $faqRecords = DB_fetchAll($result);
+    foreach ($faqRecords AS $faq) {
+        $url = COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $faq['id']);
+        $item = '<a href="'.$url.'" title="'.htmlspecialchars($faq['question']).'">'.$faq['question'].'</a>';
+        $items[] = $item;
+    }
+    if (count($items) != 0 ) {
+        $retval = array($LANG_FAQ['plugin_name'],sprintf($LANG_FAQ['whatsnew_period'],$_FAQ_CONF['whatsnew_interval']),$items);
+    }
+    return $retval;
+}
 
 /**
 * Return information for a FAQ
@@ -420,7 +298,7 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
             case 'date' :
             case 'date-modified':
             case 'date-created' :
-                $fields[] = 'UNIX_TIMESTAMP(last_updated) AS unixdate';
+                $fields[] = 'UNIX_TIMESTAMP(a.last_updated) AS unixdate';
                 break;
             case 'description':
                 $fields[] = 'question';
@@ -448,18 +326,24 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
             case 'url':
             case 'status' :
                 $fields[] = 'id';
-                $fields[] = 'published';
+                $fields[] = 'draft';
                 break;
             case 'author' :
             case 'author_name' :
-                $fields[] = 'owner_id';
+                $fields[] = 'a.owner_uid';
                 break;
             case 'hits' :
                 $fields[] = 'hits';
                 break;
             case 'perms' :
-
+                $fields[] = 'c.owner_id AS owner';
+                $fields[] = 'c.group_id';
+                $fields[] = 'c.perm_owner';
+                $fields[] = 'c.perm_group';
+                $fields[] = 'c.perm_members';
+                $fields[] = 'c.perm_anon';
                 break;
+
             default:
                 break;
         }
@@ -473,16 +357,20 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
         return $retval;
     }
 
+    $permSQL = COM_getPermSql('AND');
+
     if ($id == '*') {
         $where = '';
-        $permOp = 'WHERE published=1 ';
+        $permOp = 'WHERE a.draft=0 ';
     } else {
-        $where = " WHERE id = '" . DB_escapeString($id) . "' ";
-        $permOp = 'AND';
+        $where = " WHERE a.id = '" . DB_escapeString($id) . "' ";
+        $permOp = '';
     }
 
+    $where = $where . $permOp . $permSQL;
+
     $sql = "SELECT " . implode(',', $fields)
-            . " FROM {$_TABLES['faq_questions']} "
+            . " FROM {$_TABLES['faq_questions']} AS a LEFT JOIN {$_TABLES['faq_categories']} AS c ON a.cat_id=c.cat_id "
             . " " . $where;
     if ($id != '*') {
         $sql .= ' LIMIT 1';
@@ -532,27 +420,25 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
                     $props['label'] = $LANG_FAQ['plugin_name'];
                     break;
                 case 'status':
-                    $props['status'] = $A['published'] == 1 ? 1 : 0;
+                    $props['status'] = $A['draft'] == 0 ? 1 : 0;
                     break;
                 case 'author' :
-                    $props['author'] = $A['owner_id'];
+                    $props['author'] = $A['owner_uid'];
                     break;
                 case 'author_name' :
-                    $props['author_name'] = $A['owner_id'];
+                    $props['author_name'] = COM_getDisplayName($A['owner_uid']);
                     break;
                 case 'hits' :
                     $props['hits'] = $A['hits'];
                     break;
                 case 'perms' :
-                    $p_anon = 0;
-                    $p_member = 0;
                     $props['perms'] = array(
-                        'owner_id' => 2,
-                        'group_id' => 3,
-                        'perm_owner' => 3,
-                        'perm_group' => 2,
-                        'perm_members' => 2,
-                        'perm_anon' => 2,
+                        'owner_id' => $A['owner'],
+                        'group_id' => $A['group_id'],
+                        'perm_owner' => $A['perm_owner'],
+                        'perm_group' => $A['perm_group'],
+                        'perm_members' => $A['perm_members'],
+                        'perm_anon' => $A['perm_anon'],
                     );
                     break;
                 default:

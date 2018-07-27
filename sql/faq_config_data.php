@@ -19,7 +19,6 @@ if (!defined ('GVERSION')) {
 }
 
 $faqConfigData = array(
-
     array(
         'name' => 'sg_main',
         'default_value' => NULL,
@@ -31,7 +30,6 @@ $faqConfigData = array(
         'set' => TRUE,
         'group' => 'faq'
     ),
-
     array(
         'name' => 'fs_main',
         'default_value' => NULL,
@@ -43,31 +41,51 @@ $faqConfigData = array(
         'set' => TRUE,
         'group' => 'faq'
     ),
-
     array(
-        'name' => 'category_sort_field',
-        'default_value' => 'title',
-        'type' => 'select',
+        'name' => 'faq_title',
+        'default_value' => 'Frequently Asked Questions',
+        'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 0,
-        'selection_array' => 4,
+        'selection_array' => NULL,
         'sort' => 10,
         'set' => TRUE,
         'group' => 'faq'
     ),
-
     array(
-        'name' => 'category_sort_dir',
-        'default_value' => 'DESC',
+        'name' => 'displayblocks',
+        'default_value' => 0,
         'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
-        'selection_array' => 5,
+        'selection_array' => 1,
         'sort' => 20,
         'set' => TRUE,
         'group' => 'faq'
     ),
-
+    array(
+        'name' => 'question_sort_field',
+        'default_value' => 'question',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 4,
+        'sort' => 30,
+        'set' => TRUE,
+        'group' => 'faq'
+    ),
+    array(
+        'name' => 'question_sort_dir',
+        'default_value' => 'ASC',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 5,
+        'sort' => 40,
+        'set' => TRUE,
+        'group' => 'faq'
+    ),
+// what's new fieldset
     array(
         'name' => 'fs_whatsnew',
         'default_value' => NULL,
@@ -94,7 +112,7 @@ $faqConfigData = array(
 
     array(
         'name' => 'whatsnew_interval',
-        'default_value' => 1209600, // 2 weeks
+        'default_value' => 14, // 2 weeks
         'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 1,

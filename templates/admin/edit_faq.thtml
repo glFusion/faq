@@ -21,10 +21,10 @@
 
 					<div class="uk-width-medium-1-2">
 						<label class="uk-form-label">
-							{lang_published}
+							{lang_draft}
 						</label>
 						<div class="uk-form-controls">
-							<input type="checkbox" name="published" id="published" {publish_checked}>
+							<input type="checkbox" name="draft" id="draft" {draft_checked}>
 						</div>
 					</div>
 				</div>

@@ -17,7 +17,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: "POST",
-            url: "/faq/vote.php",
+            url: glfusionSiteUrl + "/faq/vote.php",
             data: {
                 id: $("#faqid").val(),
                 type: "yes",
@@ -37,7 +37,7 @@ $(document).ready(function() {
         e.preventDefault();
         $.ajax({
             type: "POST",
-            url: "/faq/vote.php",
+            url: glfusionSiteUrl + "/faq/vote.php",
             data: {
                 id: $("#faqid").val(),
                 type: "no",

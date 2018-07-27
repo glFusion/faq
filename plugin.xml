@@ -2,8 +2,8 @@
     <id>faq</id>
     <name>FAQ</name>
     <description>Frequenty Asked Questions</description>
-    <version>0.0.1</version>
-    <glfusionversion>1.7.0</glfusionversion>
+    <version>0.1.0</version>
+    <glfusionversion>1.7.5</glfusionversion>
     <phpversion>5.3.3</phpversion>
     <url>https://www.glfusion.org</url>
     <maintainer>Mark R. Evans</maintainer>

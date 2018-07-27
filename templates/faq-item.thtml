@@ -1,23 +1,27 @@
-{# #}
+{# begin {templatelocation} #}
+
 <a href="{site_url}/faq/index.php">
 	<i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}
 </a>
 
 <hr>
 
-<h1 class="uk-text-bold">
+{!if not_found}
+<h2>{not_found}</h2>
+{!else}
+<h1 class="uk-text-bold" style="line-height:1.3">
 	{question}
 </h1>
 
-<div style="line-height:1.6;">
+<div style="font-size:16px;line-height:1.6;">
 	{answer}
 </div>
 
 <div class="uk-text-small uk-text-right">
 	{lang_last_updated}: {last_updated}
-{!if edit_link}
+	{!if edit_link}
 	<a class="uk-margin-left" href="{edit_link}" title="{lang_edit}"><i class="uk-icon uk-icon-pencil"></i></a>
-{!endif}
+	{!endif}
 </div>
 
 <hr class="uk-margin-bottom-large">
@@ -25,15 +29,56 @@
 <form class="uk-form">
 	<input type="hidden" id="faqid" name="faqid" value="{id}">
 
-<div id="faq-feedback" class="uk-margin-top">
-	<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
-	<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
-	<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
-</div>
+	<div id="faq-feedback" class="uk-margin-top">
+		<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
+		<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
+		<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
+	</div>
 
 </form>
 
 <div class="uk-margin-large">
 	<a href="{site_url}/faq/index.php"><i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}</a>
 </div>
-{# #}
+{!endif}
+<script>
+	$(document).ready(function() {
+		$("#helpful_yes").click(function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: "POST",
+				url: glfusionSiteUrl + "/faq/vote.php",
+				data: {
+					id: $("#faqid").val(),
+					type: "yes",
+				},
+				success: function(result) {
+					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', { timeout: 1000,pos:'top-center'});
+					$("#helpful_yes").removeAttr('onclick');
+					$("#helpful_yes").attr("disabled", "disabled");
+					$("#helpful_no").attr("disabled", "disabled");
+					$("#faq-feedback").text('{lang_thank_you}');
+				}
+			});
+		});
+		$("#helpful_no").click(function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: "POST",
+				url: glfusionSiteUrl + "/faq/vote.php",
+				data: {
+					id: $("#faqid").val(),
+					type: "no",
+				},
+				success: function(result) {
+					$.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + '{lang_thank_you}', {timeout: 1000,pos:'top-center'});
+					$("#helpful_yes").removeAttr('onclick');
+					$("#helpful_yes").attr("disabled", "disabled");
+					$("#helpful_no").attr("disabled", "disabled");
+					$("#faq-feedback").text('{lang_thank_you}');
+				}
+			});
+		});
+	});
+</script>
+{# end {templatelocation} #}

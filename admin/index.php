@@ -36,7 +36,7 @@ USES_lib_admin();
 */
 function listFaq()
 {
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ, $_IMAGE_TYPE;
+    global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ, $_IMAGE_TYPE;
 
     $retval = "";
 
@@ -46,10 +46,10 @@ function listFaq()
         array('text' => $LANG_FAQ['category'],  'field' => 'category',   'sort' => true, 'align' => 'left'),
         array('text' => $LANG_FAQ['helpful_yes'],  'field' => 'helpful_yes', 'sort' => true, 'align' => 'center'),
         array('text' => $LANG_FAQ['helpful_no'],  'field' => 'helpful_no','sort' => true, 'align' => 'center'),
-        array('text' => $LANG_FAQ['published'], 'field' => 'published',  'sort' => true, 'align' => 'center'),
+        array('text' => $LANG_FAQ['draft'], 'field' => 'draft',  'sort' => true, 'align' => 'center'),
     );
-    $defsort_arr = array('field'     => 'question',
-                         'direction' => 'ASC');
+    $defsort_arr = array('field'     => $_FAQ_CONF['question_sort_field'],
+                         'direction' => $_FAQ_CONF['question_sort_dir']);
     $text_arr = array(
             'form_url'      => $_CONF['site_admin_url'] . '/plugins/faq/index.php?faqlist=x',
             'help_url'      => '',
@@ -59,7 +59,7 @@ function listFaq()
             'no_data'       => $LANG_FAQ['no_faqs'],
     );
 
-    $sql = "SELECT id, id AS faq_id,cat_id AS category,question,answer,published,helpful_yes,helpful_no "
+    $sql = "SELECT id, id AS faq_id,cat_id AS category,question,answer,draft,helpful_yes,helpful_no "
             . "FROM {$_TABLES['faq_questions']} ";
 
     $query_arr = array('table' => 'faq_questions',
@@ -111,13 +111,16 @@ function listCategories()
 
     $retval = "";
 
+    categoryReorder();
+
     $header_arr = array(
         array('text' => $LANG_FAQ['edit'], 'field' => 'cat_id', 'sort' => false, 'align' => 'center'),
         array('text' => $LANG_FAQ['title'], 'field' => 'title', 'sort' => true, 'align' => 'left'),
         array('text' => $LANG_FAQ['description'], 'field' => 'description', 'sort' => true, 'align' => 'left'),
         array('text' => $LANG_FAQ['number_of_questions'], 'field' => 'num_questions', 'sort' => true, 'align' => 'center'),
+        array('text' => $LANG_FAQ['sort_order'], 'field' => 'sort_order', 'sort' => true, 'align' => 'center'),
     );
-    $defsort_arr = array('field'     => 'title',
+    $defsort_arr = array('field'     => 'sort_order',
                          'direction' => 'ASC');
     $text_arr = array(
             'form_url'      => $_CONF['site_admin_url'] . '/plugins/faq/index.php?catlist=x',
@@ -128,7 +131,7 @@ function listCategories()
             'no_data'       => $LANG_FAQ['no_cats'],
     );
 
-    $sql = "SELECT cat_id, cat_id AS id, cat_id AS num_questions, title,description "
+    $sql = "SELECT cat_id, cat_id AS id, cat_id AS num_questions, title,description,sort_order "
             . "FROM {$_TABLES['faq_categories']} ";
 
     $query_arr = array('table' => 'faq_categories',
@@ -197,16 +200,30 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
             $retval = $catIndex[$fieldvalue];
             break;
 
-        case 'published' :
-            if ( $fieldvalue != 1 ) {
+        case 'draft' :
+            if ( (int) $fieldvalue == 1 ) {
                 $retval = '<i class="uk-icon uk-icon-times uk-text-danger"></i>';
             } else {
-                $retval = '<i class="uk-icon uk-icon-check-circle uk-text-success"></i>';
+                $retval = '';
+//                $retval = '<i class="uk-icon uk-icon-check-circle uk-text-success"></i>';
             }
             break;
 
         case 'num_questions' :
             $retval = (int) DB_count($_TABLES['faq_questions'],'cat_id',(int) $A['cat_id']);
+            break;
+
+        case 'sort_order' :
+            $retval = (int) $fieldvalue;
+            break;
+
+        case 'helpful_yes' :
+        case 'helpful_no'  :
+            if ((int) $fieldvalue == 0) {
+                $retval = '-';
+            } else {
+                $retval = (int) $fieldvalue;
+            }
             break;
 
         default :
@@ -228,8 +245,7 @@ function saveFaq()
     $cat_id     = (int) COM_applyFilter($_POST['cat_id'],true);
     $question   = $_POST['question'];
     $answer     = $_POST['answer'];
-//    $owner_id   = $_POST['owner_id'];
-    $published  = (isset($_POST['published']) ? 1 : 0);
+    $draft  = (isset($_POST['draft']) ? 1 : 0);
 
     $filter = new sanitizer();
     $filter->setPostmode('text');
@@ -246,10 +262,10 @@ function saveFaq()
     $owner_id = $_USER['uid'];
 
     if ( $faq_id == 0 ) {
-        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,published,question,answer,owner_id,last_updated) "
+        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,draft,question,answer,owner_uid,last_updated) "
                ." VALUES ("
                . $filter->prepareForDB($cat_id).","
-               . (int) $published .","
+               . (int) $draft .","
                ."'".$filter->prepareForDB($question)."',"
                ."'".$filter->prepareForDB($answer)."',"
                . $filter->prepareForDB($owner_id).","
@@ -260,10 +276,9 @@ function saveFaq()
     } else {
         $sql = "UPDATE {$_TABLES['faq_questions']} SET "
                ."cat_id=".(int) $cat_id.","
-               ."published=".(int) $published.","
+               ."draft=".(int) $draft.","
                ."question='".$filter->prepareForDB($question)."',"
                ."answer='".$filter->prepareForDB($answer)."',"
-               ."owner_id=".(int) $owner_id.","
                ."last_updated='".$filter->prepareForDB($last_updated)."'"
                ." WHERE id=".(int) $faq_id;
         $result = DB_query($sql);
@@ -273,6 +288,7 @@ function saveFaq()
     COM_setMsg( $LANG_FAQ['faq_saved'], 'warning' );
 
     CACHE_remove_instance('menu');
+    CACHE_remove_instance('whatsnew');
 
     if (isset($_POST['src']) && $_POST['src'] == 'faq') {
         echo COM_refresh($_CONF['site_url'].'/faq/index.php?id='.(int)$faq_id);
@@ -289,7 +305,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
     $display = '';
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
-    $T->set_file ('form','edit_entry.thtml');
+    $T->set_file ('form','edit_faq.thtml');
 
     $T->set_var(array(
         'lang_faq'          => $LANG_FAQ['faq'],
@@ -297,7 +313,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_title'        => $LANG_FAQ['title'],
         'lang_question'     => $LANG_FAQ['question'],
         'lang_answer'       => $LANG_FAQ['answer'],
-        'lang_published'    => $LANG_FAQ['published'],
+        'lang_draft'        => $LANG_FAQ['draft'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
     ));
@@ -324,14 +340,14 @@ function editFaq($mode,$faq_id='',$cat_id=0)
     } else {
         $A['id'] = '';
         $A['cat_id'] = $cat_id;
-        $A['published'] = 0;
+        $A['draft'] = 0;
         $A['last_updated'] = date('Y-m-d');
         $A['question']= '';
         $A['answer'] = '';
-        $A['owner_id']  = $_USER['uid'];
+        $A['owner_uid']  = $_USER['uid'];
     }
 
-    $user_select= COM_optionList($_TABLES['users'], 'uid,username',$A['owner_id']);
+    $user_select= COM_optionList($_TABLES['users'], 'uid,username',$A['owner_uid']);
 
     $category_select = '';
 
@@ -347,20 +363,20 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $category_select .= '>' . $record['title'] . '</option>';
     }
 
-    $publishChecked = '';
-    if ( $A['published'] ) {
-        $publishChecked = ' checked="checked" ';
+    $draftChecked = '';
+    if ( $A['draft'] ) {
+        $draftChecked = ' checked="checked" ';
     }
 
     $T->set_var(array(
         'row_id'            => $A['id'],
         'row_faqid'         => $A['id'],
         'row_cat_id'        => $A['cat_id'],
-        'row_published'     => $A['published'],
+        'row_draft'         => $A['draft'],
         'row_lastupdated'   => $A['last_updated'],
         'row_question'      => $A['question'],
         'row_answer'        => $A['answer'],
-        'publish_checked'   => $publishChecked,
+        'draft_checked'     => $draftChecked,
         'user_select'       => $user_select,
         'category_select'   => $category_select,
         'sec_token_name'    => CSRF_TOKEN,
@@ -392,6 +408,8 @@ function editCategory($mode,$cat_id='')
         'lang_category'     => $LANG_FAQ['category'],
         'lang_title'        => $LANG_FAQ['title'],
         'lang_description'  => $LANG_FAQ['description'],
+        'lang_display_after'=> $LANG_FAQ['display_after'],
+        'lang_sort_order'   => $LANG_FAQ['sort_order'],
         'lang_owner'        => $LANG_FAQ['owner'],
         'lang_group'        => $LANG_FAQ['group'],
         'lang_permissions'  => $LANG_FAQ['permissions'],
@@ -402,11 +420,20 @@ function editCategory($mode,$cat_id='')
         $result = DB_query ("SELECT * FROM {$_TABLES['faq_categories']} WHERE cat_id = ".(int) $cat_id);
         $A = DB_fetchArray($result);
     } else {
+        $sort_order = 10;
+        $sql = "SELECT sort_order, MAX(sort_order) FROM {$_TABLES['faq_categories']} GROUP BY cat_id;";
+        $result = DB_query($sql);
+        if (DB_numRows($result) > 0 ) {
+            $max = DB_fetchArray($result);
+            $sort_order = (int) $max['sort_order'] + 10;
+        }
+
         $A['cat_id'] = '';
         $A['title'] = '';
         $A['description'] = '';
+        $A['sort_order'] = $sort_order;
         $A['owner_id'] = $_USER['uid'];
-        $A['group_id'] = DB_getItem($_TABLES['groups'],'grp_id','grp_name = "faq Admin"');
+        $A['group_id'] = DB_getItem($_TABLES['groups'],'grp_id','grp_name = "FAQ Admin"');
         $A['perm_owner'] = $_FAQ_CONF['default_permissions_category'][0];
         $A['perm_group'] = $_FAQ_CONF['default_permissions_category'][1];
         $A['perm_members'] = $_FAQ_CONF['default_permissions_category'][2];
@@ -417,12 +444,26 @@ function editCategory($mode,$cat_id='')
     $user_select  = COM_optionList($_TABLES['users'], 'uid,username',$A['owner_id']);
     $group_select = COM_optionList($_TABLES['groups'],'grp_id,grp_name',$A['group_id']);
 
+    $sort_select = '<option value="0">' . $LANG_FAQ['first_position'] . '</option>';
+    $result = DB_query("SELECT cat_id,title,sort_order FROM {$_TABLES['faq_categories']} ORDER BY sort_order ASC");
+    $order = 10;
+    while ($row = DB_fetchArray($result)) {
+        if ( $A['sort_order'] != $order ) {
+            $label = $row['title'];
+            $test_order = $order + 10;
+            $sort_select .= '<option value="' . $order . '"' . ($A['sort_order'] == $test_order ? ' selected="selected"' : '') . '>' . $label . '</option>';
+        }
+        $order += 10;
+    }
+
     $T->set_var(array(
         'row_cat_id'        => $A['cat_id'],
         'row_title'         => $A['title'],
         'row_description'   => $A['description'],
+        'row_sort_order'    => $A['sort_order'],
         'user_select'       => $user_select,
         'group_select'      => $group_select,
+        'sort_select'       => $sort_select,
         'sec_token_name'    => CSRF_TOKEN,
         'sec_token'         => SEC_createToken(),
         'permissions_editor' => SEC_getPermissionsHTML($A['perm_owner'],$A['perm_group'],$A['perm_members'],$A['perm_anon'])
@@ -448,6 +489,7 @@ function saveCategory()
     $cat_id      = (int) COM_applyFilter($_POST['cat_id'],true);
     $title       = $_POST['title'];
     $description = $_POST['description'];
+    $sort_order  = (int) COM_applyFilter($_POST['sort_order'],true) + 1;
     $owner_id    = (int) COM_applyFilter($_POST['owner'],true);
     $group_id    = (int) COM_applyFilter($_POST['group'],true);
 
@@ -467,11 +509,12 @@ function saveCategory()
     $last_updated = $dt->toMySQL(true);
 
     if ( $cat_id == 0 ) {
-        $sql = "INSERT INTO {$_TABLES['faq_categories']} (title,description,last_updated,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) "
+        $sql = "INSERT INTO {$_TABLES['faq_categories']} (title,description,sort_order,last_updated,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) "
                ." VALUES ("
                ."'".$filter->prepareForDB($title)."',"
                ."'".$filter->prepareForDB($description)."',"
-               ."'".$last_updated."',"
+               ."'".(int) $sort_order."',"
+               ."'".$filter->prepareForDB($last_updated)."',"
                . $filter->prepareForDB($owner_id).","
                . $filter->prepareForDB($group_id).","
                . $filter->prepareForDB($perm_owner).","
@@ -485,6 +528,7 @@ function saveCategory()
         $sql = "UPDATE {$_TABLES['faq_categories']} SET "
                ."title='".$filter->prepareForDB($title)."',"
                ."description='".$filter->prepareForDB($description)."',"
+               ."sort_order=".(int) $sort_order.","
                ."last_updated='".$filter->prepareForDB($last_updated)."',"
                ."owner_id=".(int) $owner_id.","
                ."group_id=".(int) $group_id.","
@@ -498,7 +542,9 @@ function saveCategory()
     PLG_itemSaved($cat_id,'faq');
 
     COM_setMsg( $LANG_FAQ['category_saved'], 'warning' );
+
     CACHE_remove_instance('menu');
+    CACHE_remove_instance('whatsnew');
 
     return listCategories();
 }
@@ -513,16 +559,19 @@ function deleteCategory()
             $delete_id = (int) COM_applyFilter($id,true);
             if ( $delete_id > 0 ) {
                 // remove all FAQs associated with this category
-                DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE cat_id=".(int) $delete_id);
-
+                $faqResult = DB_query("SELECT id FROM {$_TABLES['faq_questions']} WHERE cat_id = " . (int) $delete_id);
+                $faqRecords = DB_fetchAll($faqResult);
+                foreach ($faqRecords AS $faq) {
+                    DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE id=".(int) $faq['id']. " AND cat_id=".(int) $delete_id);
+                    PLG_itemDeleted($faq['id'],'faq');
+                }
                 // delete the category
                 DB_query("DELETE FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $delete_id);
-
-                // need to figure out how to call PLG_itemDeleted() for each FAQ that was removed
-                PLG_itemDeleted($delete_id,'faq');
             }
         }
     }
+    CACHE_remove_instance('menu');
+    CACHE_remove_instance('whatsnew');
     return;
 }
 
@@ -540,6 +589,10 @@ function deleteFaq()
             }
         }
     }
+
+    CACHE_remove_instance('menu');
+    CACHE_remove_instance('whatsnew');
+
     return;
 }
 
@@ -551,8 +604,8 @@ function faq_admin_menu($action)
 
     $menu_arr = array(
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x','text' => $LANG_FAQ['faq_list'],'active' => ($action == 'faqlist' ? true : false)),
-        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x','text'=> ($action == 'edit_existing' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'faqedit' || $action == 'edit_existing' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catlist=x','text' => $LANG_FAQ['cat_list'],'active' => ($action == 'catlist' ? true : false)),
+        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x','text'=> ($action == 'edit_existing' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'faqedit' || $action == 'edit_existing' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catedit=x','text'=> ($action == 'edit_existing_cat' ? $LANG_FAQ['edit_cat'] : $LANG_FAQ['create_new_cat']), 'active'=> ($action == 'catedit' || $action == 'edit_existing_cat' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'], 'text' => $LANG_ADMIN['admin_home'])
     );
@@ -572,6 +625,32 @@ function validateDate($date, $format = 'Y-m-d H:i:s')
 {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;
+}
+
+/**
+*
+* Re-orders all blocks in steps of 10
+*
+*/
+function categoryReorder()
+{
+    global $_TABLES;
+    $sql = "SELECT * FROM {$_TABLES['faq_categories']} ORDER BY sort_order asc;";
+    $result = DB_query($sql);
+    $nrows = DB_numRows($result);
+    $categoryOrd = 10;
+    $stepNumber = 10;
+
+    for ($i = 0; $i < $nrows; $i++) {
+        $A = DB_fetchArray($result);
+        if ($A['sort_order'] != $categoryOrd) {  // only update incorrect ones
+            $q = "UPDATE " . $_TABLES['faq_categories'] . " SET sort_order = '" .
+                  $categoryOrd . "' WHERE cat_id = '" . $A['cat_id'] ."'";
+            DB_query($q);
+        }
+        $categoryOrd += $stepNumber;
+    }
+    return true;
 }
 
 $page = '';

@@ -21,7 +21,10 @@ if (!in_array('faq', $_PLUGINS)) {
     exit;
 }
 
-if (isset($_GET['id'])) {
+COM_setArgNames( array('id') );
+$id = (int) COM_applyFilter(COM_getArgument( 'id' ),true);
+
+if ($id != 0) {
     $page = faqItem($_GET['id']);
 } else {
     $page = faqIndex();
@@ -44,60 +47,76 @@ function faqItem($id)
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates');
     $T->set_file('page','faq-item.thtml');
 
+    // set it here - we'll clear it if we find a FAQ
+    $T->set_var('not_found',$LANG_FAQ['no_faq_found']);
+
+    $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
+
     $id = (int) COM_applyFilter($id,true);
 
     $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} WHERE id=".(int) $id);
-    if (DB_numRows($result) != 1) {
-        return 'FAQ not found';
-    }
-    $faqRecord = DB_fetchArray($result);
+    if (DB_numRows($result) == 1) {
+        $faqRecord = DB_fetchArray($result);
 
-    // check permission of the category that this FAQ belongs
+        // look up the category permissions for this FAQ
+        $sql = "SELECT owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $faqRecord['cat_id'];
+        $result = DB_query($sql);
+        if (DB_numRows($result) == 1) {
 
-    $sql = "SELECT * FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $faqRecord['cat_id'];
-    $result = DB_query($sql);
-    if (DB_numRows($result) != 1) {
-        return 'FAQ not found';
-    }
-    $categoryRecord = DB_fetchArray($result);
+            $categoryRecord = DB_fetchArray($result);
 
-    $permission = COM_getEffectivePermission( $categoryRecord['owner_id'],
-                                              $categoryRecord['group_id'],
-                                              $categoryRecord['perm_owner'],
-                                              $categoryRecord['perm_group'],
-                                              $categoryRecord['perm_members'],
-                                              $categoryRecord['perm_anon']
-                                            );
+            $permission = COM_getEffectivePermission( $categoryRecord['owner_id'],
+                                                      $categoryRecord['group_id'],
+                                                      $categoryRecord['perm_owner'],
+                                                      $categoryRecord['perm_group'],
+                                                      $categoryRecord['perm_members'],
+                                                      $categoryRecord['perm_anon']
+                                                    );
 
-    if ($permission == 0) {
-        return 'FAQ not found';
-    }
+            if ($permission != 0) {
 
-    DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
+                $outputHandle = outputHandler::getInstance();
+                $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
+//                $outputHandle->addLinkScript($_CONF['site_url'].'/faq/faq.js');
 
-    $T->set_var(array(
-        'id'        => $faqRecord['id'],
-        'question'  => $faqRecord['question'],
-        'answer'    => $filter->displayText($faqRecord['answer']),
-        'last_updated' => $faqRecord['last_updated'],
-        'lang_back_to_home' => $LANG_FAQ['back_to_home'],
-        'lang_helpful'      => $LANG_FAQ['helpful'],
-        'lang_yes'          => $LANG_FAQ['yes'],
-        'lang_no'           => $LANG_FAQ['no'],
-        'lang_last_updated' => $LANG_FAQ['last_updated'],
-        'lang_edit'         => $LANG_FAQ['edit'],
-    ));
+                $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
 
-    if ($permission == 3) {
-        $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$faqRecord['id'].'&src=faq');
+                if ( !COM_isAnonUser() ) {
+                    if ( empty( $_USER['format'] )) {
+                        $dateformat = $_CONF['date'];
+                    } else {
+                        $dateformat = $_USER['format'];
+                    }
+                } else {
+                    $dateformat = $_CONF['date'];
+                }
+
+                DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
+
+                $T->set_var(array(
+                    'id'                => $faqRecord['id'],
+                    'question'          => $faqRecord['question'],
+                    'answer'            => $filter->displayText($faqRecord['answer']),
+                    'last_updated'      => $dt->format($dateformat,true),
+                    'lang_helpful'      => $LANG_FAQ['helpful'],
+                    'lang_yes'          => $LANG_FAQ['yes'],
+                    'lang_no'           => $LANG_FAQ['no'],
+                    'lang_last_updated' => $LANG_FAQ['last_updated'],
+                    'lang_edit'         => $LANG_FAQ['edit'],
+                    'lang_thank_you'    => $LANG_FAQ['thank_you'],
+                ));
+
+                if ($permission == 3) {
+                    $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$faqRecord['id'].'&src=faq');
+                }
+                $T->unset_var('not_found');
+            }
+        }
     }
 
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
 
-    $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
-    $outputHandle->addLinkScript($_CONF['site_url'].'/faq/faq.js');
     return $page;
 }
 
@@ -114,7 +133,7 @@ function faqIndex($category = 0) {
     $T->set_file('page','faq-index.thtml');
 
     $permSQL = COM_getPermSql ();
-    $sql = "SELECT cat_id,title,description FROM {$_TABLES['faq_categories']} " . $permSQL;
+    $sql = "SELECT cat_id,title,description FROM {$_TABLES['faq_categories']} " . $permSQL . " ORDER BY sort_order ASC";
     $result = DB_query($sql);
     $categoryResults = DB_fetchAll($result);
 
@@ -125,6 +144,12 @@ function faqIndex($category = 0) {
     $filter->setReplaceTags(true);
     $filter->setCensorData(true);
     $filter->setPostmode('html');
+
+    if (isset($_FAQ_CONF['faq_title']) && $_FAQ_CONF['faq_title'] != '') {
+        $T->set_var('faq_title',$_FAQ_CONF['faq_title']);
+    } else {
+        $T->set_var('faq_title',$LANG_FAQ['faq_title']);
+    }
 
     foreach ($categoryResults AS $category) {
         $T->set_block('page','category','cy');
@@ -141,7 +166,17 @@ function faqIndex($category = 0) {
         }
 
         // pull all questions
-        $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} WHERE cat_id=".(int) $category['cat_id']." AND published=1 ORDER BY question ASC");
+        $faqOrderBy = " ORDER BY questions ASC ";
+        if (isset($_FAQ_CONF['question_sort_field'])) {
+            $faqOrderBy = " ORDER BY " . $_FAQ_CONF['question_sort_field'];
+            if (isset($_FAQ_CONF['question_sort_dir'])) {
+                $faqOrderBy .= " " . $_FAQ_CONF['question_sort_dir'] . " ";
+            } else {
+                $faqOrderBy .= " ASC ";
+            }
+        }
+
+        $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} WHERE cat_id=".(int) $category['cat_id']." AND draft=0 " . $faqOrderBy);
         $faqResults = DB_fetchAll($result);
 
         $T->set_block('page','questions','qs');
@@ -154,6 +189,7 @@ function faqIndex($category = 0) {
                     'answer' => $filter->displayText($faq['answer']),
                     'last_updated' => $faq['last_updated'],
                     'id' => $faq['id'],
+                    'faq_url' => COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $faq['id']),
                 ));
                 $T->parse('qs','questions',true);
             }
@@ -167,6 +203,10 @@ function faqIndex($category = 0) {
         $T->set_var('qs','');
     }
 
+    if (count($categoryResults) == 0) {
+        $T->set_var('lang_no_cat_or_faq',$LANG_FAQ['no_cat_or_faq']);
+    }
+
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
 
@@ -176,7 +216,7 @@ function faqIndex($category = 0) {
     return $page;
 }
 
-$display = COM_siteHeader(0,$LANG_FAQ['plugin_name']);
+$display = COM_siteHeader($_FAQ_CONF['menu'],$LANG_FAQ['plugin_name']);
 $display .= $page;
 $display .= COM_siteFooter();
 
