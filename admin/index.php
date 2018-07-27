@@ -41,11 +41,11 @@ function listFaq()
     $retval = "";
 
     $header_arr = array(
-        array('text' => $LANG_FAQ['edit'],      'field' => 'faq_id',     'sort' => false, 'align' => 'center'),
-        array('text' => $LANG_FAQ['question'],  'field' => 'question',   'sort' => true, 'align' => 'left'),
-        array('text' => $LANG_FAQ['category'],  'field' => 'category',   'sort' => true, 'align' => 'left'),
-        array('text' => $LANG_FAQ['helpful_yes'],  'field' => 'helpful_yes', 'sort' => true, 'align' => 'center'),
-        array('text' => $LANG_FAQ['helpful_no'],  'field' => 'helpful_no','sort' => true, 'align' => 'center'),
+        array('text' => $LANG_FAQ['edit'], 'field' => 'faq_id',     'sort' => false, 'align' => 'center'),
+        array('text' => $LANG_FAQ['question'], 'field' => 'question',   'sort' => true, 'align' => 'left'),
+        array('text' => $LANG_FAQ['category'], 'field' => 'category',   'sort' => true, 'align' => 'left'),
+        array('text' => $LANG_FAQ['helpful_yes'], 'field' => 'helpful_yes', 'sort' => true, 'align' => 'center'),
+        array('text' => $LANG_FAQ['helpful_no'], 'field' => 'helpful_no','sort' => true, 'align' => 'center'),
         array('text' => $LANG_FAQ['draft'], 'field' => 'draft',  'sort' => true, 'align' => 'center'),
     );
     $defsort_arr = array('field'     => $_FAQ_CONF['question_sort_field'],
@@ -176,11 +176,16 @@ function listCategories()
 
 function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
 {
-    global $_CONF, $_USER, $_TABLES, $LANG_ADMIN, $LANG04, $LANG28, $_IMAGE_TYPE;
+    global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_ADMIN, $LANG04, $LANG28, $_IMAGE_TYPE;
 
     $retval = '';
 
     static $catIndex = array();
+
+    $filter = \sanitizer::getInstance();
+    $filter->setNamespace('faq','answer');
+    $filter->setReplaceTags(false);
+    $filter->setCensorData(true);
 
     switch ($fieldname) {
         case 'cat_id' :
@@ -205,7 +210,6 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
                 $retval = '<i class="uk-icon uk-icon-times uk-text-danger"></i>';
             } else {
                 $retval = '';
-//                $retval = '<i class="uk-icon uk-icon-check-circle uk-text-success"></i>';
             }
             break;
 
@@ -226,6 +230,11 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
             }
             break;
 
+        case 'question' :
+            $filter->setPostMode('text');
+            $retval = $filter->displayText($fieldvalue);
+            break;
+
         default :
            $retval = $fieldvalue;
            break;
@@ -236,10 +245,7 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
 
 function saveFaq()
 {
-    global $_CONF, $_TABLES, $_USER, $LANG_FAQ;
-
-    // we need to do some error checking here - make sure everything
-    // is set and in proper format (such as date).
+    global $_CONF, $_FAQ_CONF, $_TABLES, $_USER, $LANG_FAQ;
 
     $faq_id     = (int) COM_applyFilter($_POST['faq_id'],true);
     $cat_id     = (int) COM_applyFilter($_POST['cat_id'],true);
@@ -248,13 +254,6 @@ function saveFaq()
     $draft  = (isset($_POST['draft']) ? 1 : 0);
 
     $filter = new sanitizer();
-    $filter->setPostmode('text');
-    $question  = $filter->filterText($question);
-
-    $filter->setAllowedElements('div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub');
-
-    $filter->setPostmode('html');
-    $answer = $filter->filterHTML($answer);
 
     $dt = new Date('now',$_CONF['timezone']);
     $last_updated = $dt->toMySQL(true);
@@ -299,7 +298,7 @@ function saveFaq()
 
 function editFaq($mode,$faq_id='',$cat_id=0)
 {
-    global $_CONF, $_USER, $_TABLES, $LANG_FAQ;
+    global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_FAQ;
 
     $retval = '';
     $display = '';
@@ -316,6 +315,8 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_draft'        => $LANG_FAQ['draft'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
+        'visual_editor'     => 'Visual',
+        'html_editor'       => 'HTML',
     ));
 
     if ( file_exists($_CONF['path_layout'].'ck_styles.js') ) {
@@ -368,6 +369,17 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $draftChecked = ' checked="checked" ';
     }
 
+    $filter = \sanitizer::getInstance();
+    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
+    $filter->setAllowedelements($AllowedElements);
+
+    $filter->setNamespace('faq','answer');
+    $filter->setReplaceTags(false);
+    $filter->setCensorData(false);
+    $filter->setPostmode('html');
+
+    $answer = $filter->editableText($A['answer']);
+
     $T->set_var(array(
         'row_id'            => $A['id'],
         'row_faqid'         => $A['id'],
@@ -375,7 +387,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'row_draft'         => $A['draft'],
         'row_lastupdated'   => $A['last_updated'],
         'row_question'      => $A['question'],
-        'row_answer'        => $A['answer'],
+        'row_answer'        => $answer,
         'draft_checked'     => $draftChecked,
         'user_select'       => $user_select,
         'category_select'   => $category_select,

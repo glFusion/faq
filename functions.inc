@@ -37,6 +37,10 @@ if (file_exists ($langfile)) {
 */
 require_once $_CONF['path'] . 'plugins/faq/faq.php';
 
+if (!isset($_FAQ_CONF['allowed_html'])) {
+    $_FAQ_CONF['allowed_html'] = 'div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub';
+}
+
 if ( !isset($_FAQ_CONF['displayblocks'])) $_FAQ_CONF['displayblocks'] = 'menu';
 
 switch( $_FAQ_CONF['displayblocks'] ) {
@@ -256,6 +260,11 @@ function plugin_getwhatsnew_faq() {
         return $retval;
     }
 
+    $filter = sanitizer::getInstance();
+    $filter->setReplaceTags(false);
+    $filter->setCensorData(true);
+    $filter->setPostmode('text');
+
     $items = array();
 
     $sql =  "SELECT * FROM {$_TABLES['faq_questions']} AS a ";
@@ -267,8 +276,10 @@ function plugin_getwhatsnew_faq() {
     $result = DB_query($sql);
     $faqRecords = DB_fetchAll($result);
     foreach ($faqRecords AS $faq) {
+        $question = $filter->displayText($faq['question']);
+
         $url = COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $faq['id']);
-        $item = '<a href="'.$url.'" title="'.htmlspecialchars($faq['question']).'">'.$faq['question'].'</a>';
+        $item = '<a href="'.$url.'" title="'.$question.'">'.$question.'</a>';
         $items[] = $item;
     }
     if (count($items) != 0 ) {
@@ -379,6 +390,14 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
     $result = DB_query($sql);
     $numRows = DB_numRows($result);
 
+    $filter = \sanitizer::getInstance();
+    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
+    $filter->setAllowedelements($AllowedElements);
+    $filter->setNamespace('faq','answer');
+    $filter->setReplaceTags(false);
+    $filter->setCensorData(false);
+    $filter->setPostmode('html');
+
     $retval = array();
     for ($i = 0; $i < $numRows; $i++) {
         $A = DB_fetchArray($result);
@@ -392,10 +411,14 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
                     $props[$p] = $A['unixdate'];
                     break;
                 case 'description':
-                    $props[$p] = nl2br($A['question']);
+                    $filter->setPostmode('html');
+                    $props[$p] = $filter->displayText($A['answer']);
                     break;
                 case 'excerpt':
-                    $props[$p] = nl2br(FAQ_truncate($A['question'],300,'...'));
+                    $filter->setPostmode('html');
+                    $answer = $filter->filterHTML($A['question']);
+                    $answer = $filter->displayText($answer);
+                    $props[$p] = FAQ_truncate($answer,300,'...');
                     break;
                 case 'searchidx' :
                     $props[$p] = $A['question'].' '.$A['answer'];
@@ -407,7 +430,8 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
                     $props['id'] = $A['id'];
                     break;
                 case 'title':
-                    $props['title'] = $A['question'];
+                    $filter->setPostmode('text');
+                    $props['title'] = $filter->displayText($A['question']);
                     break;
                 case 'url':
                     if (empty($A['id'])) {

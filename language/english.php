@@ -80,6 +80,7 @@ $LANG_configsections['faq'] = array(
 
 $LANG_confignames['faq'] = array(
     'faq_title'           => 'FAQ Main Title',
+    'allowed_html'        => 'Allowed HTML in Answers',
     'displayblocks'       => 'Display Blocks',
     'question_sort_field' => 'FAQ Sort Field',
     'question_sort_dir'   => 'FAQ Sort Direction',
@@ -107,5 +108,4 @@ $LANG_configselects['faq'] = array(
     5  => array('Descending' => 'DESC', 'Ascending' => 'ASC'),
     6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
 );
-
 ?>

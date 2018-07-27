@@ -37,7 +37,7 @@ function faqItem($id)
     $page = '';
 
     $filter = sanitizer::getInstance();
-    $AllowedElements = $filter->makeAllowedElements('div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub');
+    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
     $filter->setAllowedelements($AllowedElements);
     $filter->setNamespace('faq','answer');
     $filter->setReplaceTags(true);
@@ -77,7 +77,6 @@ function faqItem($id)
 
                 $outputHandle = outputHandler::getInstance();
                 $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
-//                $outputHandle->addLinkScript($_CONF['site_url'].'/faq/faq.js');
 
                 $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
 
@@ -93,10 +92,16 @@ function faqItem($id)
 
                 DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
 
+                $filter->setPostmode('text');
+                $question = $filter->displayText($faqRecord['question']);
+
+                $filter->setPostmode('html');
+                $answer = $filter->displayText($filter->filterHTML($faqRecord['answer']));
+
                 $T->set_var(array(
                     'id'                => $faqRecord['id'],
-                    'question'          => $faqRecord['question'],
-                    'answer'            => $filter->displayText($faqRecord['answer']),
+                    'question'          => $question,
+                    'answer'            => $answer,
                     'last_updated'      => $dt->format($dateformat,true),
                     'lang_helpful'      => $LANG_FAQ['helpful'],
                     'lang_yes'          => $LANG_FAQ['yes'],
@@ -137,8 +142,8 @@ function faqIndex($category = 0) {
     $result = DB_query($sql);
     $categoryResults = DB_fetchAll($result);
 
-    $filter = sanitizer::getInstance();
-    $AllowedElements = $filter->makeAllowedElements('div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub');
+    $filter = \sanitizer::getInstance();
+    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
     $filter->setAllowedelements($AllowedElements);
     $filter->setNamespace('faq','answer');
     $filter->setReplaceTags(true);
@@ -184,9 +189,13 @@ function faqIndex($category = 0) {
         if (count($faqResults) > 0 ) {
             $T->unset_var('lang_no_faqs');
             foreach ($faqResults AS $faq) {
+                $filter->setPostmode('text');
+                $question = $filter->displayText($faq['question']);
+                $filter->setPostmode('html');
+                $answer = $filter->displayText($filter->filterHTML($faq['answer']));
                 $T->set_var(array(
-                    'question' => $faq['question'],
-                    'answer' => $filter->displayText($faq['answer']),
+                    'question' => $question,
+                    'answer' => $answer,
                     'last_updated' => $faq['last_updated'],
                     'id' => $faq['id'],
                     'faq_url' => COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $faq['id']),
