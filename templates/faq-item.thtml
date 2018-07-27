@@ -17,6 +17,8 @@
 	{answer}
 </div>
 
+<div class="uk-clearfix"></div>
+
 <div class="uk-text-small uk-text-right">
 	{lang_last_updated}: {last_updated}
 	{!if edit_link}
