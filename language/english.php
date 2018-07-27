@@ -4,7 +4,7 @@
 *
 * FAQ - Frequently Asked Questions Plugin
 *
-* English Language - UTF-8
+* English Language
 *
 * @license GNU General Public License version 2 or later
 *     http://www.opensource.org/licenses/gpl-license.php
@@ -107,4 +107,5 @@ $LANG_configselects['faq'] = array(
     5  => array('Descending' => 'DESC', 'Ascending' => 'ASC'),
     6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
 );
+
 ?>
