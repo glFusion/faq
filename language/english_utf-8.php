@@ -71,6 +71,8 @@ $LANG_FAQ = array (
     'title'                 => 'Title',
     'whatsnew_period'       => 'last %s days',
     'yes'                   => 'YES',
+    'visual'                => 'Visual',
+    'html'                  => 'HTML',
 );
 
 $LANG_configsections['faq'] = array(

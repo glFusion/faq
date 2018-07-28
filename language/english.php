@@ -65,12 +65,14 @@ $LANG_FAQ = array (
     'owner'                 => 'Category Owner',
     'permissions'           => 'Permissions',
     'question'              => 'Question',
-    'save'				    => 'Save',
+    'save'		            => 'Save',
     'sort_order'            => 'Order',
     'thank_you'             => 'Thank you for your feedback!',
     'title'                 => 'Title',
     'whatsnew_period'       => 'last %s days',
     'yes'                   => 'YES',
+    'visual'                => 'Visual',
+    'html'                  => 'HTML',
 );
 
 $LANG_configsections['faq'] = array(
