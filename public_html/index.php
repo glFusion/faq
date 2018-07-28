@@ -25,7 +25,7 @@ COM_setArgNames( array('id') );
 $id = (int) COM_applyFilter(COM_getArgument( 'id' ),true);
 
 if ($id != 0) {
-    $page = faqItem($_GET['id']);
+    $page = faqItem($id);
 } else {
     $page = faqIndex();
 }
@@ -55,67 +55,64 @@ function faqItem($id)
     $id = (int) COM_applyFilter($id,true);
 
     $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} WHERE id=".(int) $id);
+
+    $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} AS f LEFT JOIN {$_TABLES['faq_categories']} AS c ON f.cat_id=c.cat_id WHERE f.id = ".(int) $id);
+
     if (DB_numRows($result) == 1) {
         $faqRecord = DB_fetchArray($result);
 
-        // look up the category permissions for this FAQ
-        $sql = "SELECT owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $faqRecord['cat_id'];
-        $result = DB_query($sql);
-        if (DB_numRows($result) == 1) {
+        $permission = COM_getEffectivePermission( $faqRecord['owner_id'],
+                                                  $faqRecord['group_id'],
+                                                  $faqRecord['perm_owner'],
+                                                  $faqRecord['perm_group'],
+                                                  $faqRecord['perm_members'],
+                                                  $faqRecord['perm_anon']
+                                                );
 
-            $categoryRecord = DB_fetchArray($result);
+        if ($permission != 0) {
 
-            $permission = COM_getEffectivePermission( $categoryRecord['owner_id'],
-                                                      $categoryRecord['group_id'],
-                                                      $categoryRecord['perm_owner'],
-                                                      $categoryRecord['perm_group'],
-                                                      $categoryRecord['perm_members'],
-                                                      $categoryRecord['perm_anon']
-                                                    );
+            $outputHandle = outputHandler::getInstance();
+            $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
 
-            if ($permission != 0) {
+            $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
 
-                $outputHandle = outputHandler::getInstance();
-                $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
-
-                $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
-
-                if ( !COM_isAnonUser() ) {
-                    if ( empty( $_USER['format'] )) {
-                        $dateformat = $_CONF['date'];
-                    } else {
-                        $dateformat = $_USER['format'];
-                    }
-                } else {
+            if ( !COM_isAnonUser() ) {
+                if ( empty( $_USER['format'] )) {
                     $dateformat = $_CONF['date'];
+                } else {
+                    $dateformat = $_USER['format'];
                 }
-
-                DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
-
-                $filter->setPostmode('text');
-                $question = $filter->displayText($faqRecord['question']);
-
-                $filter->setPostmode('html');
-                $answer = $filter->displayText($filter->filterHTML($faqRecord['answer']));
-
-                $T->set_var(array(
-                    'id'                => $faqRecord['id'],
-                    'question'          => $question,
-                    'answer'            => $answer,
-                    'last_updated'      => $dt->format($dateformat,true),
-                    'lang_helpful'      => $LANG_FAQ['helpful'],
-                    'lang_yes'          => $LANG_FAQ['yes'],
-                    'lang_no'           => $LANG_FAQ['no'],
-                    'lang_last_updated' => $LANG_FAQ['last_updated'],
-                    'lang_edit'         => $LANG_FAQ['edit'],
-                    'lang_thank_you'    => $LANG_FAQ['thank_you'],
-                ));
-
-                if ($permission == 3) {
-                    $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$faqRecord['id'].'&src=faq');
-                }
-                $T->unset_var('not_found');
+            } else {
+                $dateformat = $_CONF['date'];
             }
+
+            DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
+
+            $filter->setPostmode('text');
+            $question  = $filter->displayText($faqRecord['question']);
+            $cat_title = $filter->displayText($faqRecord['title']);
+
+            $filter->setPostmode('html');
+            $answer = $filter->displayText($filter->filterHTML($faqRecord['answer']));
+
+            $T->set_var(array(
+                'id'                => $faqRecord['id'],
+                'question'          => $question,
+                'answer'            => $answer,
+                'cat_title'         => $cat_title,
+                'last_updated'      => $dt->format($dateformat,true),
+                'lang_helpful'      => $LANG_FAQ['helpful'],
+                'lang_yes'          => $LANG_FAQ['yes'],
+                'lang_no'           => $LANG_FAQ['no'],
+                'lang_last_updated' => $LANG_FAQ['last_updated'],
+                'lang_edit'         => $LANG_FAQ['edit'],
+                'lang_thank_you'    => $LANG_FAQ['thank_you'],
+            ));
+
+            if ($permission == 3) {
+                $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$faqRecord['id'].'&src=faq');
+            }
+            $T->unset_var('not_found');
         }
     }
 
@@ -143,12 +140,10 @@ function faqIndex($category = 0) {
     $categoryResults = DB_fetchAll($result);
 
     $filter = \sanitizer::getInstance();
-    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
-    $filter->setAllowedelements($AllowedElements);
-    $filter->setNamespace('faq','answer');
-    $filter->setReplaceTags(true);
+    $filter->setNamespace('faq','category');
+    $filter->setReplaceTags(false);
     $filter->setCensorData(true);
-    $filter->setPostmode('html');
+    $filter->setPostmode('text');
 
     if (isset($_FAQ_CONF['faq_title']) && $_FAQ_CONF['faq_title'] != '') {
         $T->set_var('faq_title',$_FAQ_CONF['faq_title']);
@@ -158,13 +153,18 @@ function faqIndex($category = 0) {
 
     foreach ($categoryResults AS $category) {
         $T->set_block('page','category','cy');
+
+        $filter->setPostmode('text');
+        $title       = $filter->displayText($category['title']);
+        $description = $filter->displayText($category['description']);
+
         $T->set_var(array(
-            'category_title' => $category['title'],
-            'description'   => $category['description'],
+            'category_title'      => $title,
+            'description'         => $description,
             'lang_create_new_faq' => $LANG_FAQ['create_new_faq'],
         ));
 
-        if(SEC_inGroup('faq Admin')) {
+        if(SEC_inGroup('FAQ Admin')) {
             $T->set_var('add_item_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&cat_id='.$category['cat_id'].'&src=faq');
         } else {
             $T->unset_var('add_item_link');
@@ -220,7 +220,7 @@ function faqIndex($category = 0) {
     $page = $T->finish($T->get_var('output'));
 
     $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
+    $outputHandle->addLinkStyle($_CONF['site_url'].'/css/faq/style.css');
 
     return $page;
 }
