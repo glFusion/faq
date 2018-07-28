@@ -1,5 +1,7 @@
 {# begin {templatelocation} #}
 
+<h2>{cat_title}</h2>
+
 <a href="{site_url}/faq/index.php">
 	<i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}
 </a>
