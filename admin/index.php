@@ -200,9 +200,21 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
 
         case 'category' :
             if (!isset($catIndex[$fieldvalue])) {
-                $catIndex[$fieldvalue] = DB_getItem($_TABLES['faq_categories'],'title','cat_id='.(int) $fieldvalue);
+                $filter->setPostMode('text');
+                $cat_title = DB_getItem($_TABLES['faq_categories'],'title','cat_id='.(int) $fieldvalue);
+                $catIndex[$fieldvalue] = $filter->displayText($cat_title);
             }
             $retval = $catIndex[$fieldvalue];
+            break;
+
+        case 'title' :
+            $filter->setPostMode('text');
+            $retval = $filter->displayText($fieldvalue);
+            break;
+
+        case 'description' :
+            $filter->setPostMode('text');
+            $retval = $filter->displayText($fieldvalue);
             break;
 
         case 'draft' :
@@ -320,19 +332,11 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
         'lang_timeout'      => $LANG_ADMIN['timeout_msg'],
-        'visual_editor'     => 'Visual',
-        'html_editor'       => 'HTML',
+        'visual_editor'     => $LANG_FAQ['visual'],
+        'html_editor'       => $LANG_FAQ['html'],
     ));
 
-    if ( file_exists($_CONF['path_layout'].'ck_styles.js') ) {
-        $T->set_var('styleset',"stylesSet: '".$_USER['theme'].":".$_CONF['layout_url']."/ck_styles.js',");
-    }
-    list($cacheFile,$cacheURL) = COM_getStyleCacheLocation();
-    $T->set_var(array(
-        'theme'     => $_USER['theme'],
-        'path_html' => $_CONF['path_html'],
-        'css_url'   => $cacheURL,
-    ));
+    $wysiwyg = PLG_requestEditor('faq', 'faq_editor', $_CONF['path'] . 'plugins/faq/templates/admin/faq_wysiwyg.thtml');
 
     if (isset($_GET['src']) && $_GET['src'] == 'faq') {
         $T->set_var('src','faq');
@@ -405,6 +409,8 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $T->set_var('lang_cancel',$LANG_FAQ['cancel']);
     }
 
+    PLG_templateSetVars('faq_editor',$T);
+
     SEC_setCookie ($_CONF['cookie_name'].'adveditor', SEC_createTokenGeneral('advancededitor'),
                     time() + 1200, $_CONF['cookie_path'],
                     $_CONF['cookiedomain'], $_CONF['cookiesecure'],false);
@@ -442,11 +448,11 @@ function editCategory($mode,$cat_id='')
         $A = DB_fetchArray($result);
     } else {
         $sort_order = 10;
-        $sql = "SELECT sort_order, MAX(sort_order) FROM {$_TABLES['faq_categories']} GROUP BY cat_id;";
+        $sql = "SELECT sort_order, MAX(sort_order) AS max FROM {$_TABLES['faq_categories']};";
         $result = DB_query($sql);
         if (DB_numRows($result) > 0 ) {
             $max = DB_fetchArray($result);
-            $sort_order = (int) $max['sort_order'] + 10;
+            $sort_order = (int) $max['max'] + 10;
         }
 
         $A['cat_id'] = '';
@@ -472,15 +478,21 @@ function editCategory($mode,$cat_id='')
         if ( $A['sort_order'] != $order ) {
             $label = $row['title'];
             $test_order = $order + 10;
-            $sort_select .= '<option value="' . $order . '"' . ($A['sort_order'] == $test_order ? ' selected="selected"' : '') . '>' . $label . '</option>';
+            $sort_select .= '<option value="' . $test_order . '"' . ($A['sort_order'] == $test_order ? ' selected="selected"' : '') . '>' . $label . '</option>';
         }
         $order += 10;
     }
 
+    $filter = \sanitizer::getInstance();
+    $filter->setNamespace('faq','answer');
+    $filter->setReplaceTags(false);
+    $filter->setCensorData(false);
+    $filter->setPostmode('html');
+
     $T->set_var(array(
         'row_cat_id'        => $A['cat_id'],
-        'row_title'         => $A['title'],
-        'row_description'   => $A['description'],
+        'row_title'         => $filter->editableText($A['title']),
+        'row_description'   => $filter->editableText($A['description']),
         'row_sort_order'    => $A['sort_order'],
         'user_select'       => $user_select,
         'group_select'      => $group_select,
@@ -523,8 +535,11 @@ function saveCategory()
     $filter = new sanitizer();
 
     $filter->setPostmode('text');
-    $title = $filter->filterText($title);
-    $description = $filter->filterText($description);
+//    $title = $filter->filterText($title);
+//    $description = $filter->filterText($description);
+// don't filter on save
+
+
 
     $dt = new Date('now',$_CONF['timezone']);
     $last_updated = $dt->toMySQL(true);
