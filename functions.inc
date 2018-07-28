@@ -441,7 +441,7 @@ function plugin_getiteminfo_faq($id, $what, $uid = 0, $options = array())
     $filter->setAllowedelements($AllowedElements);
     $filter->setNamespace('faq','answer');
     $filter->setReplaceTags(false);
-    $filter->setCensorData(false);
+    $filter->setCensorData(true);
     $filter->setPostmode('html');
 
     $retval = array();
@@ -580,26 +580,6 @@ function plugin_ismoderator_faq()
 
     if ( SEC_hasRights('faq.admin') ) return true;
     return false;
-}
-
-
-/**
-* Called when plugin is enabled / disabled via the plugin administration
-* screen.
-*
-* @param   boolean  $state - true if enabling, false if disabling
-*/
-function plugin_enablestatechange_faq( $enable )
-{
-    global $_TABLES;
-
-    if ( $enable == FALSE ) {
-        DB_query("UPDATE {$_TABLES['blocks']} SET is_enabled=0 WHERE name='block_faq'",1);
-    } else {
-        DB_query("UPDATE {$_TABLES['blocks']} SET is_enabled=1 WHERE name='block_faq'",1);
-    }
-
-    return 1;
 }
 
 /*
