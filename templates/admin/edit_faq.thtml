@@ -1,6 +1,39 @@
 {# begin {templatelocation} #}
-<script src="{site_url}/ckeditor/ckeditor.js" ></script >
+<script>
+	var editor_type = 'faqeditor';
+	var lang_timer  = "{lang_timeout}";
+	var lastActivity = 0;
+
+	function actionClick( $action ) {
+		if ( $action == 'cancel' ) {
+			UIkit.modal.confirm("{$LANG24[124]}", function(){
+				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+				$('#faqadmin').trigger('submit', [ { $action: true } ]);
+			}, function(){});
+		} else {
+	  	$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+			$('#faqadmin').trigger('submit', [ { $action: true } ]);
+		}
+	}
+{!if !wysiwyg}
+  function activityCheck( edtType ) {
+		lastActivity = new Date().getTime();
+		if ( edtType == 'wysiwyg' ) {
+  		sp_content.on( 'key', function(){
+	  		lastActivity = new Date().getTime();
+    	});
+  	} else {
+			$('#sp_content').keyup(function() {
+				lastActivity = new Date().getTime();
+			});
+		}
+  }
+{!endif}
+</script>
+
 <div class="uk-panel uk-panel-box">
+	{wysiwyg}
+
 	<form id="faqadmin" class="uk-form " action="{site_admin_url}/plugins/faq/index.php" method="post">
 		<input type="hidden" name="faq_id" value="{row_faqid}">
 		<input type="hidden" name="type" value="faq">
@@ -15,7 +48,7 @@
 					<div class="uk-width-medium-1-2">
 						<label class="uk-form-label uk-text-bold">{lang_category}</label>
 						<div class="uk-form-controls">
-							<select name="cat_id">
+							<select name="cat_id" tabindex="10">
 								{category_select}
 							</select>
 						</div>
@@ -26,7 +59,7 @@
 							{lang_draft}
 						</label>
 						<div class="uk-form-controls">
-							<input type="checkbox" name="draft" id="draft" {draft_checked}>
+							<input type="checkbox" name="draft" id="draft" tabindex="5" {draft_checked}>
 						</div>
 					</div>
 				</div>
@@ -35,84 +68,38 @@
 			<div class="uk-form-row">
 				<label class="uk-form-label uk-text-bold">{lang_question}</label>
 				<div class="uk-form-controls">
-					<input class="required uk-form-width-xlarge" type="text" name="question" size="80" value="{row_question}">
+					<input class="required uk-form-width-xlarge" type="text" name="question" size="80" autofocus tabindex="1" value="{row_question}">
 				</div>
 			</div>
 
 			<div class="uk-form-row">
 				<label class="uk-form-label uk-text-bold">{lang_answer}</label>
 				<div class="uk-form-controls">
+{!if wysiwyg}
 					<div class="uk-margin-small">
-						<button id="visual" type="button" class="uk-button" value="{visual_editor}" onclick="won('answer');$('#std').attr('class','uk-button');$('#visual').attr('class','uk-button uk-button-success');">{visual_editor}</button>
-						<button id="std" type="button" class="uk-button uk-button-success" value="{html_editor}"  onclick="woff('answer');$('#visual').attr('class','uk-button');$('#std').attr('class','uk-button uk-button-success')">{html_editor}</button>
+						<button id="visual" type="button" class="uk-button" tabindex="6" value="{visual_editor}" onclick="won('answer');$('#std').attr('class','uk-button');$('#visual').attr('class','uk-button uk-button-success');">{visual_editor}</button>
+						<button id="std" type="button" class="uk-button uk-button-success" tabindex="7" value="{html_editor}"  onclick="woff('answer');$('#visual').attr('class','uk-button');$('#std').attr('class','uk-button uk-button-success')">{html_editor}</button>
 					</div>
-					<textarea class="uk-form-width-large texteditor required" id="answer" name="answer" rows="24" style="width:100%;">{row_answer}</textarea>
+{!endif}
+					<textarea class="uk-form-width-large texteditor required" tabindex="2" id="answer" name="answer" rows="24" style="width:100%;">{row_answer}</textarea>
 				</div>
 			</div>
 		</fieldset>
 
 		<div class="uk-form-row uk-text-left uk-margin-top">
-			<button class="uk-button uk-button-primary" type="submit" name="save" value="x">{lang_save}</button>
-			<button class="uk-button cancel" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
-			{!if delete_option}
+			<button class="uk-button uk-button-primary" type="submit" tabindex="3" name="save" value="x">{lang_save}</button>
+			<button class="uk-button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+{!if delete_option}
 			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
-			{!endif}
+{!endif}
 		</div>
 	</form>
 </div>
 <script>
-	$( "#faqadmin" ).validate({
-		errorElement: "div",
-		errorClass: "uk-text-danger",
-		rules: {
-			testurl: {
-				url: true
-			},
-			errorPlacement: function(error, element) {
-				error.insertAfter(element);
-			}
-		}
+	$(document).ready(function() {
+		activityCheck('textarea');
 	});
-</script>
-<script >
-	var editor_type = 'faqeditor';
-	var lang_timer  = "{lang_timeout}";
-	var lastActivity = 0;
-	var site_url = "{site_url}";
-	var answer;
-	function loadEditor(id) {
-		var instance = CKEDITOR.replace( id, {
-			contentsCss: '{css_url}',
-			bodyClass: 'tm-container faq',
-			extraPlugins: 'mediagallery,youtube2',
-			{styleset}
-			height: 500,
-			{!if mbmissing} {# check for mbstring extension in PHP #}
-			filebrowserBrowseUrl :  '',
-			filebrowserImageBrowseUrl : '',
-			{!endif}
-			language: '{iso_lang}',
-			protectedSource:[/\[code\][\s\S]*\[\/code\]/g],
-
-			allowedContent: {
-				$1: {
-					elements: CKEDITOR.dtd,
-					attributes: true,
-					styles: true,
-					classes: true
-				}
-			},
-			disallowedContent: 'table[cellspacing,cellpadding,border]'
-		} );
-		instance.config.protectedSource.push(/<i[^>]*><\/i>/g);
-		return instance;
-	}
-	function won (id) {
-		answer = loadEditor('answer');
-	}
-	function woff (id) {
-		answer.destroy();
-	}
+	$("#faqadmin").validate();
 </script>
 <script src="{site_url}/javascript/activitytimer.js"></script>
 {# end {templatelocation} #}
