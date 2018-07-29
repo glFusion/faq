@@ -1,3 +1,4 @@
 FAQ Plugin ChangeLog
 
-## v0.0.1 (unreleased)
+## v1.0.0 (unreleased)
+ - Initial Public Release
