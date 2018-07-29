@@ -10,24 +10,24 @@
 				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
 				$('#faqadmin').trigger('submit', [ { $action: true } ]);
 			}, function(){});
-		} else {
-	  	$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
-			$('#faqadmin').trigger('submit', [ { $action: true } ]);
+			} else {
+				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+				$('#faqadmin').trigger('submit', [ { $action: true } ]);
+			}
 		}
-	}
 {!if !wysiwyg}
-  function activityCheck( edtType ) {
+	function activityCheck( edtType ) {
 		lastActivity = new Date().getTime();
 		if ( edtType == 'wysiwyg' ) {
-  		sp_content.on( 'key', function(){
-	  		lastActivity = new Date().getTime();
-    	});
-  	} else {
+			sp_content.on( 'key', function(){
+				lastActivity = new Date().getTime();
+			});
+		} else {
 			$('#sp_content').keyup(function() {
 				lastActivity = new Date().getTime();
 			});
 		}
-  }
+	}
 {!endif}
 </script>
 
@@ -35,7 +35,7 @@
 	{wysiwyg}
 
 	<form id="faqadmin" class="uk-form " action="{site_admin_url}/plugins/faq/index.php" method="post">
-		<input type="hidden" name="faq_id" value="{row_faqid}">
+		<input type="hidden" id="faq_id" name="faq_id" value="{row_faqid}">
 		<input type="hidden" name="type" value="faq">
 		<input type="hidden" name="src" value="{src}">
 		<input type="hidden" name="{sec_token_name}" value="{sec_token}">
@@ -43,34 +43,57 @@
 		<fieldset class="uk-margin-top">
 			<legend>{lang_faq}</legend>
 
-			<div class="uk-form-row">
-				<div class="uk-grid">
-					<div class="uk-width-medium-1-2">
-						<label class="uk-form-label uk-text-bold">{lang_category}</label>
-						<div class="uk-form-controls">
-							<select name="cat_id" tabindex="10">
-								{category_select}
-							</select>
+			{# Top section #}
+
+			<div class="uk-grid uk-margin-bottom">
+				<div class="uk-width-medium-3-4">
+					<div class="uk-form-row">
+						<div class="uk-grid">
+							<div class="uk-width-medium-1-2">
+								<label class="uk-form-label uk-text-bold">{lang_category}</label>
+								<div class="uk-form-controls">
+									<select name="cat_id" tabindex="10">
+										{category_select}
+									</select>
+								</div>
+							</div>
+
+							<div class="uk-width-medium-1-2">
+								<label class="uk-form-label uk-text-bold">
+									{lang_draft}
+								</label>
+								<div class="uk-form-controls">
+									<input class="uk-text-right" type="checkbox" name="draft" id="draft" tabindex="5" {draft_checked}>
+								</div>
+							</div>
 						</div>
 					</div>
 
-					<div class="uk-width-medium-1-2">
-						<label class="uk-form-label uk-text-bold">
-							{lang_draft}
-						</label>
+					<div class="uk-form-row">
+						<label class="uk-form-label uk-text-bold">{lang_question}</label>
 						<div class="uk-form-controls">
-							<input type="checkbox" name="draft" id="draft" tabindex="5" {draft_checked}>
+							<input style="width:100%;" class="required uk-form-width-xlarge" type="text" name="question" size="80" autofocus tabindex="1" value="{row_question}">
 						</div>
 					</div>
 				</div>
+
+{!if !new_faq}
+				<div class="uk-width-medium-1-4">
+					<div class="uk-form-row">
+						{lang_hits}: {row_hits}
+					</div>
+
+					<div class="uk-form-row">
+						{lang_helpful_yes}: <span id="helpful-yes">{row_helpful_yes}</span>&nbsp;&nbsp;&nbsp;{lang_helpful_no}: <span id="helpful-no">{row_helpful_no}</span>
+					</div>
+					<div class="uk-form-row">
+						<button id="reset-helpful" class="uk-button uk-button-primary">{lang_reset_stats}</button>
+					</div>
+				</div>
+{!endif}
 			</div>
 
-			<div class="uk-form-row">
-				<label class="uk-form-label uk-text-bold">{lang_question}</label>
-				<div class="uk-form-controls">
-					<input class="required uk-form-width-xlarge" type="text" name="question" size="80" autofocus tabindex="1" value="{row_question}">
-				</div>
-			</div>
+			{# end of top section #}
 
 			<div class="uk-form-row">
 				<label class="uk-form-label uk-text-bold">{lang_answer}</label>
@@ -98,6 +121,22 @@
 <script>
 	$(document).ready(function() {
 		activityCheck('textarea');
+		$("#reset-helpful").click(function(e) {
+			e.preventDefault();
+			$.ajax({
+				type: "POST",
+				url: "{site_admin_url}/plugins/faq/resetstats.php",
+				data: {
+					id: $("#faq_id").val(),
+				},
+				success: function(result) {
+					console.log(result);
+					$("#reset-helpful").attr("disabled", "disabled");
+					$("#helpful-yes").html('0');
+					$("#helpful-no").html('0');
+				}
+			});
+		});
 	});
 	$("#faqadmin").validate();
 </script>

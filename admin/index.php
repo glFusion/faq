@@ -46,6 +46,7 @@ function listFaq()
         array('text' => $LANG_FAQ['category'], 'field' => 'category',   'sort' => true, 'align' => 'left'),
         array('text' => $LANG_FAQ['helpful_yes'], 'field' => 'helpful_yes', 'sort' => true, 'align' => 'center'),
         array('text' => $LANG_FAQ['helpful_no'], 'field' => 'helpful_no','sort' => true, 'align' => 'center'),
+        array('text' => $LANG_FAQ['views'], 'field' => 'hits','sort' => true, 'align' => 'center'),
         array('text' => $LANG_FAQ['draft'], 'field' => 'draft',  'sort' => true, 'align' => 'center'),
     );
     $defsort_arr = array('field'     => $_FAQ_CONF['question_sort_field'],
@@ -59,7 +60,7 @@ function listFaq()
             'no_data'       => $LANG_FAQ['no_faqs'],
     );
 
-    $sql = "SELECT id, id AS faq_id,cat_id AS category,question,answer,draft,helpful_yes,helpful_no "
+    $sql = "SELECT id, id AS faq_id,cat_id AS category,question,answer,draft,helpful_yes,helpful_no,hits "
             . "FROM {$_TABLES['faq_questions']} ";
 
     $query_arr = array('table' => 'faq_questions',
@@ -247,6 +248,10 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
             $retval = $filter->displayText($fieldvalue);
             break;
 
+        case 'hits' :
+            $retval = (int) $fieldvalue;
+            break;
+
         default :
            $retval = $fieldvalue;
            break;
@@ -332,6 +337,10 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
         'lang_timeout'      => $LANG_ADMIN['timeout_msg'],
+        'lang_hits'         => $LANG_FAQ['views'],
+        'lang_helpful_yes'  => $LANG_FAQ['helpful_yes'],
+        'lang_helpful_no'   => $LANG_FAQ['helpful_no'],
+        'lang_reset_stats'  => $LANG_FAQ['reset_stats'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
     ));
@@ -348,6 +357,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $result = DB_query ("SELECT * FROM {$_TABLES['faq_questions']} WHERE id = ".(int) $faq_id);
         $A = DB_fetchArray($result);
     } else {
+        $T->set_var('new_faq',true);
         $A['id'] = '';
         $A['cat_id'] = $cat_id;
         $A['draft'] = 0;
@@ -355,6 +365,9 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $A['question']= '';
         $A['answer'] = '';
         $A['owner_uid']  = $_USER['uid'];
+        $A['hits'] = 0;
+        $A['helpful_yes'] = 0;
+        $A['helpful_no'] = 0;
     }
 
     $user_select= COM_optionList($_TABLES['users'], 'uid,username',$A['owner_uid']);
@@ -397,6 +410,9 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'row_lastupdated'   => $A['last_updated'],
         'row_question'      => $A['question'],
         'row_answer'        => $answer,
+        'row_hits'          => $A['hits'],
+        'row_helpful_yes'   => $A['helpful_yes'],
+        'row_helpful_no'    => $A['helpful_no'],
         'draft_checked'     => $draftChecked,
         'user_select'       => $user_select,
         'category_select'   => $category_select,
