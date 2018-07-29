@@ -1,19 +1,43 @@
-.faq pre {
-	background: #beedff;
+/* FAQ Index Page */
+
+.faq-title {
+	font-weight:700;
 }
-.faq-title.uk-accordion-title {
-	background:transparent !important;
-	border:0;
-	border-bottom: 1px solid #ddd !important;
-	font-weight:400;
+
+.faq-category-block {
+	margin-top:10px;
 }
-.faq-answer {
+
+.faq-category-block h2 {
+	font-weight:700;
+	line-height:1.2;
+	color: #000;
+}
+
+.faq-category-block ul li {
+	margin-bottom:10px;
+}
+
+/* FAQ Item Page */
+
+.faq-item h1 {      /* question */
+	font-weight:700;
+	line-height:1.3;
+	color: #0037B4;
+}
+
+.faq-item h2 {			/* category */
+	font-weight:700;
+}
+
+.faq-answer {				/* answer */
 	font-size:16px;
-	line-height:1.5;
-	background: #eee;
-	border-radius:4px;
-	margin:10px;
+	line-height:1.6;
 }
-.faq {
-	background: #efefef;
+
+.faq-answer pre {			/* pre in answer section */
+	font-family: Consolas, monospace;
+	font-size:16px;
+	line-height: 1.3;
 }
+
