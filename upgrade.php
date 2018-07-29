@@ -29,6 +29,8 @@ function faq_upgrade()
 
     switch ($currentVersion) {
         case '0.0.1' :
+        case '0.1.0' :
+        case '0.2.0' :
 
         default:
             DB_query("UPDATE {$_TABLES['plugins']} SET pi_version='".$_FAQ_CONF['pi_version']."',pi_gl_version='".$_FAQ_CONF['gl_version']."' WHERE pi_name='faq' LIMIT 1");
