@@ -30,11 +30,26 @@ if ($id != 0) {
     $page = faqIndex();
 }
 
+/**
+ * Displays a FAQ question / answer
+ *
+ * @param  int   $id
+ * @return string faq page
+ */
 function faqItem($id)
 {
     global $_CONF, $_FAQ_CONF, $_TABLES, $_USER, $LANG_FAQ;
 
     $page = '';
+
+    $outputHandle = outputHandler::getInstance();
+    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+
+    $c = \glFusion\Cache::getInstance();
+    $key = 'faq'.(int)$id.'_'.$c->securityHash(true,true);
+    if ( $c->has($key)) {
+        return $c->get($key);
+    }
 
     $filter = sanitizer::getInstance();
     $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
@@ -71,8 +86,6 @@ function faqItem($id)
 
         if ($permission != 0) {
 
-            $outputHandle = outputHandler::getInstance();
-            $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/style.css');
 
             $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
 
@@ -119,15 +132,30 @@ function faqItem($id)
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
 
+    $c->set($key,$page,array('faq','faq'.(int)$id));
+
     return $page;
 }
 
-
-
+/**
+ * Displays the main FAQ index page
+ *
+ * @param  int   $category
+ * @return string faq index page
+ */
 function faqIndex($category = 0) {
     global $_CONF, $_FAQ_CONF, $_TABLES, $_USER, $LANG_FAQ;
 
     $page = '';
+
+    $outputHandle = outputHandler::getInstance();
+    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+
+    $c = \glFusion\Cache::getInstance();
+    $key = 'faqindex'.'_'.$c->securityHash(true,true);
+    if ( $c->has($key)) {
+        return $c->get($key);
+    }
 
     $filter = new \sanitizer();
 
@@ -219,8 +247,7 @@ function faqIndex($category = 0) {
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
 
-    $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/css/faq/style.css');
+    $c->set($key,$page,array('faq','faqindex'));
 
     return $page;
 }

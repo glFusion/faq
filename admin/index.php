@@ -298,17 +298,17 @@ function saveFaq()
 
     COM_setMsg( $LANG_FAQ['faq_saved'], 'warning' );
 
-    CACHE_remove_instance('menu');
-    CACHE_remove_instance('whatsnew');
-
     SEC_setCookie ($_CONF['cookie_name'].'adveditor', 'exired',
                     time() - 3600, $_CONF['cookie_path'],
                     $_CONF['cookiedomain'], $_CONF['cookiesecure'],false);
 
+    $c = \glFusion\Cache::getInstance();
+    $c->deleteItemsByTag('faq'.(int)$faq_id);
+    $c->deleteItemsByTags(array('menu','whatsnew','faqindex'));
+
     if (isset($_POST['src']) && $_POST['src'] == 'faq') {
         echo COM_refresh($_CONF['site_url'].'/faq/index.php?id='.(int)$faq_id);
     }
-
     return listFaq();
 }
 
@@ -535,11 +535,6 @@ function saveCategory()
     $filter = new sanitizer();
 
     $filter->setPostmode('text');
-//    $title = $filter->filterText($title);
-//    $description = $filter->filterText($description);
-// don't filter on save
-
-
 
     $dt = new Date('now',$_CONF['timezone']);
     $last_updated = $dt->toMySQL(true);
@@ -579,8 +574,8 @@ function saveCategory()
 
     COM_setMsg( $LANG_FAQ['category_saved'], 'warning' );
 
-    CACHE_remove_instance('menu');
-    CACHE_remove_instance('whatsnew');
+    $c = glFusion\Cache::getInstance();
+    $c->deleteItemsByTags(array('faq','faqindex','menu','whatsnew'));
 
     return listCategories();
 }
@@ -588,6 +583,8 @@ function saveCategory()
 function deleteCategory()
 {
     global $_CONF, $_TABLES;
+
+    $c = glFusion\Cache::getInstance();
 
     $del_ids = $_POST['cat_ids'];
     if ( is_array($del_ids) && count($del_ids) > 0 ) {
@@ -600,20 +597,23 @@ function deleteCategory()
                 foreach ($faqRecords AS $faq) {
                     DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE id=".(int) $faq['id']. " AND cat_id=".(int) $delete_id);
                     PLG_itemDeleted($faq['id'],'faq');
+                    $c->deleteItemsByTag('faq'.$faq['id']);
                 }
                 // delete the category
                 DB_query("DELETE FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $delete_id);
             }
         }
     }
-    CACHE_remove_instance('menu');
-    CACHE_remove_instance('whatsnew');
+    $c->deleteItemsByTags(array('faqindex','menu','whatsnew'));
+
     return;
 }
 
 function deleteFaq()
 {
     global $_CONF, $_TABLES;
+
+    $c = glFusion\Cache::getInstance();
 
     $del_ids = $_POST['faq_ids'];
     if ( is_array($del_ids) && count($del_ids) > 0 ) {
@@ -622,12 +622,11 @@ function deleteFaq()
             if ( $delete_id > 0 ) {
                 DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE id=".(int) $delete_id);
                 PLG_itemDeleted($delete_id,'faq');
+                $c->deleteItemsByTag('faq'.(int) $delete_id);
             }
         }
     }
-
-    CACHE_remove_instance('menu');
-    CACHE_remove_instance('whatsnew');
+    $c->deleteItemsByTags(array('faqindex','menu','whatsnew'));
 
     return;
 }
