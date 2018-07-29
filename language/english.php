@@ -54,6 +54,7 @@ $LANG_FAQ = array (
     'helpful'               => 'Was this article helpful?',
     'helpful_no'            => 'Not Helpful',
     'helpful_yes'           => 'Helpful',
+
     'id'                    => 'FAQ Id',
     'last_updated'          => 'Last Updated',
     'no'                    => 'NO',
@@ -65,12 +66,14 @@ $LANG_FAQ = array (
     'owner'                 => 'Category Owner',
     'permissions'           => 'Permissions',
     'question'              => 'Question',
+    'reset_stats'           => 'Reset Helpful Stats',
     'save'		            => 'Save',
     'sort_order'            => 'Order',
     'thank_you'             => 'Thank you for your feedback!',
     'title'                 => 'Title',
     'whatsnew_period'       => 'last %s days',
     'yes'                   => 'YES',
+    'views'                 => 'Views',
     'visual'                => 'Visual',
     'html'                  => 'HTML',
 );
