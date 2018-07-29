@@ -69,8 +69,6 @@ function faqItem($id)
 
     $id = (int) COM_applyFilter($id,true);
 
-    $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} WHERE id=".(int) $id);
-
     $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} AS f LEFT JOIN {$_TABLES['faq_categories']} AS c ON f.cat_id=c.cat_id WHERE f.id = ".(int) $id);
 
     if (DB_numRows($result) == 1) {
@@ -86,7 +84,6 @@ function faqItem($id)
 
         if ($permission != 0) {
 
-
             $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
 
             if ( !COM_isAnonUser() ) {
@@ -98,9 +95,9 @@ function faqItem($id)
             } else {
                 $dateformat = $_CONF['date'];
             }
-
-            DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
-
+            if ($faqRecord['owner_uid'] != $_USER['uid']) {
+                DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
+            }
             $filter->setPostmode('text');
             $question  = $filter->displayText($faqRecord['question']);
             $cat_title = $filter->displayText($faqRecord['title']);
@@ -177,6 +174,17 @@ function faqIndex($category = 0) {
         $T->set_var('faq_title',$_FAQ_CONF['faq_title']);
     } else {
         $T->set_var('faq_title',$LANG_FAQ['faq_title']);
+    }
+
+    $numCategory = count($categoryResults);
+    if ($numCategory >= 3) {
+        $T->set_var('cat_columns',3);
+    } else if ($numCategory == 2) {
+        $T->set_var('cat_columns',2);
+    } else if ($numCategory == 1 || $numCategory == 0) {
+        $T->set_var('cat_columns',1);
+    } else {
+        $T->set_var('cat_columns',3);
     }
 
     foreach ($categoryResults AS $category) {
