@@ -25,17 +25,21 @@
 					<a class="uk-text-small" href="{add_item_link}" title="{lang_create_new_faq}"><i class="uk-icon uk-icon-plus"></i></a>
 {!endif}
 				</h2>
-				<ul class="uk-list">
+				<ul class="uk-list faq-question-list">
 					<!-- BEGIN questions -->
 {!if question}
 					<li>
-						<a href="{faq_url}">{question}</a>
+  {!if show_question_icon}
+						<i class="uk-icon uk-icon-question-circle uk-text-primary"></i>
+  {!endif}
+
+						<a class="faq-index-question" href="{faq_url}">{question}</a>
 					</li>
 {!endif}
 					<!-- END questions -->
 {!if lang_no_faqs}
 					<li>
-						<span class="uk-text-danger">{lang_no_faqs}</span>
+						<span class="faq-index-question uk-text-danger">{lang_no_faqs}</span>
 					</li>
 {!endif}
 				</ul>

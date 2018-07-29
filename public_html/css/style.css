@@ -15,7 +15,11 @@
 }
 
 .faq-category-block ul li {
-	margin-bottom:10px;
+	margin-bottom:1.5em;
+}
+
+.faq-index-question {
+
 }
 
 /* FAQ Item Page */
@@ -35,7 +39,7 @@
 	line-height:1.6;
 }
 
-.faq-answer pre {			/* pre in answer section */
+.faq-answer pre {			/* pre in answer section - wraps text */
 	font-family: Consolas, monospace;
 	font-size:16px;
 	line-height: 1.3;

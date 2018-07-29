@@ -54,7 +54,6 @@ $LANG_FAQ = array (
     'helpful'               => 'Was this article helpful?',
     'helpful_no'            => 'Not Helpful',
     'helpful_yes'           => 'Helpful',
-
     'id'                    => 'FAQ Id',
     'last_updated'          => 'Last Updated',
     'no'                    => 'NO',
@@ -88,6 +87,7 @@ $LANG_confignames['faq'] = array(
     'default_permissions_category' => 'Default Category Permissions',
     'displayblocks'       => 'Display Blocks',
     'faq_title'           => 'FAQ Main Title',
+    'layout'              => 'FAQ Index Layout',
     'question_sort_dir'   => 'FAQ Sort Direction',
     'question_sort_field' => 'FAQ Sort Field',
     'whatsnew_enabled'    => 'Include in What\'s New Block',
@@ -112,5 +112,6 @@ $LANG_configselects['faq'] = array(
     4  => array('Question' => 'question', 'Date' => 'last_updated'),
     5  => array('Descending' => 'DESC', 'Ascending' => 'ASC'),
     6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
+    7  => array('Category in Columns' => 0, 'Single Category Column' => 1),
 );
 ?>

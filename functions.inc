@@ -37,6 +37,13 @@ if (file_exists ($langfile)) {
 */
 require_once $_CONF['path'] . 'plugins/faq/faq.php';
 
+if (!isset($_FAQ_CONF['layout'])) {
+    $_FAQ_CONF['layout'] = 1;
+}
+if (!isset($_FAQ_CONF['show_question_icon'])) {
+    $_FAQ_CONF['show_question_icon'] = 0;
+}
+
 if (!isset($_FAQ_CONF['allowed_html'])) {
     $_FAQ_CONF['allowed_html'] = 'div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub';
 }

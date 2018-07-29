@@ -157,7 +157,16 @@ function faqIndex($category = 0) {
     $filter = new \sanitizer();
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates');
-    $T->set_file('page','faq-index.thtml');
+    if (!isset($_FAQ_CONF['layout']) || $_FAQ_CONF['layout'] == 0) {
+        $T->set_file('page','faq-index-cat-columns.thtml');
+    } else {
+        $T->set_file('page','faq-index-ques-columns.thtml');
+    }
+    if (!isset($_FAQ_CONF['show_question_icon']) || $_FAQ_CONF['show_question_icon'] == 0) {
+        $T->unset_var('show_question_icon');
+    } else {
+        $T->set_var('show_question_icon',true);
+    }
 
     $permSQL = COM_getPermSql ();
     $sql = "SELECT cat_id,title,description FROM {$_TABLES['faq_categories']} " . $permSQL . " ORDER BY sort_order ASC";

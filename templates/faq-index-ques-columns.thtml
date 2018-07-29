@@ -1,0 +1,44 @@
+{# begin {templatelocation} #}
+<div class="faq">
+	<h1 class="faq-title uk-margin-small-top">{faq_title}</h1>
+
+	<!-- BEGIN category -->
+
+	<div class="faq-category-block uk-margin-large-bottom">
+		<h2>
+			{category_title}
+{!if add_item_link}
+			<a class="uk-text-small" href="{add_item_link}" title="{lang_create_new_faq}"><i class="uk-icon uk-icon-plus"></i></a>
+{!endif}
+		</h2>
+
+		<ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3 faq-question-list">
+
+			<!-- BEGIN questions -->
+{!if question}
+			<li>
+	{!if show_question_icon}
+				<i class="uk-icon uk-icon-question-circle uk-text-primary"></i>
+	{!endif}
+				<a class="faq-index-question" href="{faq_url}">{question}</a>
+			</li>
+{!endif}
+			<!-- END questions -->
+
+{!if lang_no_faqs}
+			<li>
+				<span class="faq-index-question uk-text-danger">{lang_no_faqs}</span>
+			</li>
+{!endif}
+		</ul>
+	</div>
+
+	<!-- END category -->
+
+{!if lang_no_cat_or_faq}
+	<div class="uk-text-large uk-text-left">
+		{lang_no_cat_or_faq}
+	</div>
+{!endif}
+</div>
+{# end {templatelocation} #}
