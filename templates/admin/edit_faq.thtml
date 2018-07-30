@@ -3,7 +3,7 @@
 	var editor_type = 'faqeditor';
 	var lang_timer  = "{lang_timeout}";
 	var lastActivity = 0;
-
+	var modifiedForm = 0;
 	function actionClick( $action ) {
 		if ( $action == 'cancel' ) {
 			UIkit.modal.confirm("{$LANG24[124]}", function(){
@@ -17,16 +17,10 @@
 	}
 {!if !wysiwyg}
 	function activityCheck( edtType ) {
-		lastActivity = new Date().getTime();
-		if ( edtType == 'wysiwyg' ) {
-			sp_content.on( 'key', function(){
-				lastActivity = new Date().getTime();
-			});
-		} else {
-			$('#sp_content').keyup(function() {
-				lastActivity = new Date().getTime();
-			});
-		}
+	lastActivity = new Date().getTime();
+		$('#answer').keyup(function() {
+			lastActivity = new Date().getTime();
+		});
 	}
 {!endif}
 </script>
@@ -119,7 +113,7 @@
 	</form>
 </div>
 <script>
-	var modifiedForm = 0;
+
 	$(document).ready(function() {
 		activityCheck('textarea');
 		$("#reset-helpful").click(function(e) {

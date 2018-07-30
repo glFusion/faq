@@ -366,6 +366,9 @@ function editFaq($mode,$faq_id='',$cat_id=0)
     $retval = '';
     $display = '';
 
+    $outputHandle = outputHandler::getInstance();
+    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
     $T->set_file ('form','edit_faq.thtml');
 
@@ -386,6 +389,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_unsaved'      => $LANG_FAQ['unsaved_data'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
+        'faq_css'           => $_CONF['site_url'].'/faq/css/style.css',
     ));
 
     $wysiwyg = PLG_requestEditor('faq', 'faq_editor', $_CONF['path'] . 'plugins/faq/templates/admin/faq_wysiwyg.thtml');

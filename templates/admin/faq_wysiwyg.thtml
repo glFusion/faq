@@ -1,11 +1,12 @@
+<style>.cke_contents { padding: 10px !important; }</style>
 <script src="{site_url}/ckeditor/ckeditor.js"></script>
 <script >
 	var site_url = "{site_url}";
 	var answer;
 	function loadEditor(id) {
 		var instance = CKEDITOR.replace( id, {
-			contentsCss: '{css_url}',
-			bodyClass: 'tm-container faq',
+			contentsCss: [ '{css_url}', '{faq_css}' ],
+			bodyClass: 'tm-container faq faq-article faq-answer',
 			extraPlugins: 'mediagallery,youtube2',
 			{styleset}
 			height: 500,
@@ -14,22 +15,16 @@
 			filebrowserImageBrowseUrl : '',
 {!endif}
 			language: '{iso_lang}',
-			allowedContent: {
-			    $1: {
-			        elements: CKEDITOR.dtd,
-			        attributes: true,
-			        styles: true,
-			        classes: true
-			    }
-			},
-			disallowedContent: 'table[cellspacing,cellpadding,border]'
+			allowedContent: true,
+			entities: false,
+			basicEntities: false,
+			disableReadonlyStyling :true,
 		} );
-		instance.config.protectedSource.push(/<i[^>]*><\/i>/g);
 		return instance;
 	}
-
 	function won (id) {
 		answer = loadEditor(id);
+		answer.config.protectedSource = [];
 		activityCheck('wysiwyg');
 	}
 	function woff (id) {
@@ -41,6 +36,7 @@
 		if ( edtType == 'wysiwyg' ) {
   		answer.on( 'key', function(){
 	  		lastActivity = new Date().getTime();
+				modifiedForm = 1;
     	});
   	} else {
 			$('#answer').keyup(function() {

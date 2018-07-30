@@ -32,13 +32,13 @@
 
 /* FAQ Item Page */
 
-.faq-item h1 {      /* question */
+.faq-article h1 {      /* question */
 	font-weight:700;
 	line-height:1.3;
 	color: #0037B4;
 }
 
-.faq-item h2 {			/* category */
+.faq-article h2 {			/* category */
 	font-weight:700;
 }
 
@@ -57,4 +57,3 @@
 	white-space: -o-pre-wrap;    /* Opera 7 */
 	word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
-

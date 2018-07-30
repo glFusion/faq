@@ -60,7 +60,7 @@ function faqItem($id)
     $filter->setPostmode('html');
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates');
-    $T->set_file('page','faq-item.thtml');
+    $T->set_file('page','faq-article.thtml');
 
     // set it here - we'll clear it if we find a FAQ
     $T->set_var('not_found',$LANG_FAQ['no_faq_found']);

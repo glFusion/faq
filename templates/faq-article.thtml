@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<div class="faq faq-item">
+<div class="faq faq-article">
 
 	<h2>{cat_title}</h2>
 
