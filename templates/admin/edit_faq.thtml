@@ -10,11 +10,11 @@
 				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
 				$('#faqadmin').trigger('submit', [ { $action: true } ]);
 			}, function(){});
-			} else {
-				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
-				$('#faqadmin').trigger('submit', [ { $action: true } ]);
-			}
+		} else {
+			$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+			$('#faqadmin').trigger('submit', [ { $action: true } ]);
 		}
+	}
 {!if !wysiwyg}
 	function activityCheck( edtType ) {
 		lastActivity = new Date().getTime();
@@ -110,8 +110,8 @@
 		</fieldset>
 
 		<div class="uk-form-row uk-text-left uk-margin-top">
-			<button class="uk-button uk-button-primary" type="submit" tabindex="3" name="save" value="x">{lang_save}</button>
-			<button class="uk-button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+			<button class="uk-button uk-button-primary button" type="submit" tabindex="3" name="save" value="x">{lang_save}</button>
+			<button class="uk-button button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
 {!if delete_option}
 			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
 {!endif}
@@ -119,6 +119,7 @@
 	</form>
 </div>
 <script>
+	var modifiedForm = 0;
 	$(document).ready(function() {
 		activityCheck('textarea');
 		$("#reset-helpful").click(function(e) {
@@ -136,6 +137,18 @@
 					$("#helpful-no").html('0');
 				}
 			});
+		});
+		$(':input').change(function(){
+			modifiedForm = 1;
+		});
+		window.onbeforeunload = confirmExit;
+		function confirmExit(){
+			if (modifiedForm == 1){
+				return '{lang_unsaved}';
+			}
+		}
+		$('.button').click(function(){
+			modifiedForm = 0;
 		});
 	});
 	$("#faqadmin").validate();

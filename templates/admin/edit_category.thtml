@@ -59,9 +59,8 @@
 		</fieldset>
 
 		<div class="uk-form-row uk-text-center uk-margin-top">
-
-			<button class="uk-button uk-button-primary" type="submit" name="save" value="x">{lang_save}</button>
-			<button class="uk-button cancel" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+			<button class="uk-button uk-button-primary button" type="submit" name="save" value="x">{lang_save}</button>
+			<button class="uk-button button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
 {!if delete_option}
 			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
 {!endif}
@@ -70,16 +69,34 @@
 	</form>
 </div>
 <script>
+	var modifiedForm = 0;
+	$(document).ready(function() {
+		$(':input').change(function(){
+			modifiedForm = 1;
+		});
+		window.onbeforeunload = confirmExit;
+		function confirmExit(){
+			if (modifiedForm == 1){
+				return '{lang_unsaved}';
+			}
+		}
+		$('.button').click(function(){
+			modifiedForm = 0;
+		});
+	});
+	function actionClick( $action ) {
+		if ( $action == 'cancel' ) {
+			UIkit.modal.confirm("{$LANG24[124]}", function(){
+				$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+				$('#faqadmin').trigger('submit', [ { $action: true } ]);
+			}, function(){});
+		} else {
+			$('#faqadmin').append("<input type='hidden' name='" + $action + "' value='clicked'>");
+			$('#faqadmin').trigger('submit', [ { $action: true } ]);
+		}
+	}
 	$( "#faqadmin" ).validate({
 		errorElement: "div",
 		errorClass: "uk-text-danger",
-		rules: {
-			testurl: {
-				url: true
-			},
-			errorPlacement: function(error, element) {
-				error.insertAfter(element);
-			}
-		}
 	});
 </script>

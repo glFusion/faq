@@ -41,7 +41,7 @@ $LANG_FAQ = array (
     'description'           => 'Description',
     'display_after'         => 'Display After',
     'draft'                 => 'Draft',
-    'edit'				    => 'Edit',
+    'edit'				    => 'Edit FAQ',
     'edit_cat'              => 'Edit Category',
     'edit_existing_cat'     => 'Category Editor',
     'faq'                   => 'FAQ Question / Answer Editor',
@@ -75,6 +75,7 @@ $LANG_FAQ = array (
     'views'                 => 'Views',
     'visual'                => 'Visual',
     'html'                  => 'HTML',
+    'unsaved_data'          => 'Unsaved changes! Please make sure you save your work before leaving this page.',
 );
 
 $LANG_configsections['faq'] = array(
