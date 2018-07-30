@@ -13,6 +13,7 @@ Frequently asked questions (FAQ), are a set of common or recurring questions and
 - WYSIWYG (What You See is What You Get) editor for FAQ answers. Allows for embedding additional content such as links, videos, images, etc.
 - Full Permission controls by category
 - FAQ auto tag to allow integration into other content areas
+- Multiple layout options to suit your needs
 
 ### System Requirements
 
@@ -48,6 +49,10 @@ The field used to sort the FAQ Questions on the FAQ Index Page. Options are Ques
 **FAQ Sort Direction**
 
 Determines if the FAQ questions are sorting in ascending order or descending order.
+
+**FAQ Index Layout**
+
+Select the FAQ Index page layout. Category Columns will use up to 3 columns to show the categories with the answers listed below each category. Single column category will show a Category on a line with the questions listed below in up to 3 columns.
 
 **Allowed HTML**
 
