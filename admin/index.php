@@ -36,7 +36,7 @@ USES_lib_admin();
 */
 function listFaq()
 {
-    global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ, $_IMAGE_TYPE;
+    global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ, $LANG09, $_IMAGE_TYPE;
 
     $retval = "";
 
@@ -49,6 +49,7 @@ function listFaq()
         array('text' => $LANG_FAQ['views'], 'field' => 'hits','sort' => true, 'align' => 'center'),
         array('text' => $LANG_FAQ['draft'], 'field' => 'draft',  'sort' => true, 'align' => 'center'),
     );
+
     $defsort_arr = array('field'     => $_FAQ_CONF['question_sort_field'],
                          'direction' => $_FAQ_CONF['question_sort_dir']);
     $text_arr = array(
@@ -60,16 +61,57 @@ function listFaq()
             'no_data'       => $LANG_FAQ['no_faqs'],
     );
 
+    if (!empty ($_GET['catfilter'])) {
+        $current_category = COM_applyFilter($_GET['catfilter']);
+    } elseif (!empty ($_POST['catfilter'])) {
+        $current_category = COM_applyFilter($_POST['catfilter']);
+    } else {
+        if ( SESS_isSet('faq_admin_category') ) {
+            $current_category = SESS_getVar('faq_admin_category');
+        } else {
+            $current_category = $LANG09[9];
+        }
+    }
+    SESS_setVar('faq_admin_category',$current_category);
+
+    if ($current_category == $LANG09[9]) {
+        $categoryQuery = " ";
+    } else {
+        $categoryQuery = " AND cat_id=".(int) $current_category;
+    }
+
+    $category_select = '';
+
+    // build category list
+    $sql = "SELECT * FROM {$_TABLES['faq_categories']} ORDER BY title ASC";
+    $result = DB_query($sql);
+    $resultSet = DB_fetchAll($result);
+    foreach ($resultSet AS $record) {
+        $category_select .= '<option value="'.$record['cat_id'].'"';
+        if ($current_category == $record['cat_id']) {
+            $category_select .= ' selected="selected"';
+        }
+        $category_select .= '>' . $record['title'] . '</option>';
+    }
+
+    $allcategories = '<option value="' .$LANG09[9]. '"';
+    if ($current_category == $LANG09[9]) {
+        $allcategories .= ' selected="selected"';
+    }
+    $allcategories .= '>' .$LANG09[9]. '</option>';
+
+    $filter = $LANG_FAQ['category']
+        . ': <select name="catfilter" style="width: 125px" onchange="this.form.submit()">'
+        . $allcategories . $category_select . '</select>';
+
     $sql = "SELECT id, id AS faq_id,cat_id AS category,question,answer,draft,helpful_yes,helpful_no,hits "
-            . "FROM {$_TABLES['faq_questions']} ";
+            . "FROM {$_TABLES['faq_questions']} WHERE 1=1 ";
 
     $query_arr = array('table' => 'faq_questions',
                         'sql' => $sql,
-                        'query_fields' => array('question'),
-                        'default_filter' => " WHERE 1=1 ",
+                        'query_fields' => array('question','cat_id'),
+                        'default_filter' => $categoryQuery,
                         'group_by' => "");
-
-    $filter = '';
 
     $actions = '<input name="delsel" type="image" src="'
             . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
@@ -341,6 +383,7 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_helpful_yes'  => $LANG_FAQ['helpful_yes'],
         'lang_helpful_no'   => $LANG_FAQ['helpful_no'],
         'lang_reset_stats'  => $LANG_FAQ['reset_stats'],
+        'lang_unsaved'      => $LANG_FAQ['unsaved_data'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
     ));
@@ -456,6 +499,7 @@ function editCategory($mode,$cat_id='')
         'lang_owner'        => $LANG_FAQ['owner'],
         'lang_group'        => $LANG_FAQ['group'],
         'lang_permissions'  => $LANG_FAQ['permissions'],
+        'lang_unsaved'      => $LANG_FAQ['unsaved_data'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
     ));
@@ -761,12 +805,15 @@ switch ( $cmd ) {
             switch ($_POST['type']) {
                 case 'category' :
                     $page = saveCategory();
+                    $cmd = 'catlist';
                     break;
                 case 'faq' :
                     $page = saveFaq();
+                    $cmd = 'faqlist';
                     break;
                 default :
                     $page = listFaq();
+                    $cmd = 'faqlist';
                     break;
             }
         } else {
