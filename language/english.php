@@ -107,7 +107,7 @@ $LANG_fs['faq'] = array(
 
 $LANG_configselects['faq'] = array(
     0  => array('True' => 1, 'False' => 0 ),
-    1  => array('Left Blocks' => 0, 'Right Blocks' => 1, 'All Blocks' => 2, 'No Blocks' => 3),
+    1  => array('Navigation Blocks' => 0, 'Footer Blocks' => 1, 'All Blocks' => 2, 'No Blocks' => 3),
     2  => array('Yes' => 1, 'No' => 0 ),
     3  => array('No Centerblock' => -1, 'Top of Page' => 1, 'After Featured Story' => 2, 'Bottom of Page' => 3),
     4  => array('Question' => 'question', 'Date' => 'last_updated'),
