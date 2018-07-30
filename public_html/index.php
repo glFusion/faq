@@ -120,7 +120,7 @@ function faqItem($id)
             ));
 
             if ($permission == 3) {
-                $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$faqRecord['id'].'&src=faq');
+                $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?editfaq=x&faqid='.$faqRecord['id'].'&src=faq');
             }
             $T->unset_var('not_found');
         }
@@ -210,7 +210,7 @@ function faqIndex($category = 0) {
         ));
 
         if(SEC_inGroup('FAQ Admin')) {
-            $T->set_var('add_item_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&cat_id='.$category['cat_id'].'&src=faq');
+            $T->set_var('add_item_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x&cat_id='.$category['cat_id'].'&src=faq');
         } else {
             $T->unset_var('add_item_link');
         }

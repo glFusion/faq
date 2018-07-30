@@ -25,10 +25,12 @@
 	function won (id) {
 		answer = loadEditor(id);
 		answer.config.protectedSource = [];
+		$('#editor').val('wysiwyg');
 		activityCheck('wysiwyg');
 	}
 	function woff (id) {
 		answer.destroy();
+		$('#editor').val('html');
 		activityCheck('textarea');
 	}
   function activityCheck( edtType ) {

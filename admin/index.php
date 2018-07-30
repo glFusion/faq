@@ -237,7 +237,7 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
             break;
 
         case 'faq_id' :
-            $url = $_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x&faqid='.$A['faq_id'];
+            $url = $_CONF['site_admin_url'].'/plugins/faq/index.php?editfaq=x&faqid='.$A['faq_id'];
             $retval = '<a href="'.$url.'"><i class="uk-icon uk-icon-pencil"></i></a>';
             break;
 
@@ -306,16 +306,34 @@ function saveFaq()
 {
     global $_CONF, $_FAQ_CONF, $_TABLES, $_USER, $LANG_FAQ;
 
-    $faq_id     = (int) COM_applyFilter($_POST['faq_id'],true);
+    $dt = new \Date('now',$_CONF['timezone']);
+
+    $faq_id     = (int) COM_applyFilter($_POST['id'],true);
     $cat_id     = (int) COM_applyFilter($_POST['cat_id'],true);
     $question   = $_POST['question'];
     $answer     = $_POST['answer'];
-    $draft  = (isset($_POST['draft']) ? 1 : 0);
+    $draft      = (isset($_POST['draft']) ? 1 : 0);
+
+    $_POST['draft'] = $draft;
+//    $_POST['last_updated'] = $dt->toMySQL(true);
+
+    // form validation
+    if ($cat_id <= 0) {
+        COM_setMsg($LANG_FAQ['error_no_cat'],'error',true);
+        return editFaq($_POST,false);
+    }
+    if ($question == '') {
+        COM_setMsg($LANG_FAQ['error_no_question'],'error',true);
+        return editFaq($_POST,false);
+    }
+    if ($answer == '') {
+        COM_setMsg($LANG_FAQ['error_no_answer'],'error',true);
+        return editFaq($_POST,false);
+    }
 
     $filter = new sanitizer();
 
-    $dt = new Date('now',$_CONF['timezone']);
-    $last_updated = $dt->toMySQL(true);
+     $last_updated = $dt->toMySQL(true);
 
     $owner_id = $_USER['uid'];
 
@@ -359,20 +377,97 @@ function saveFaq()
     return listFaq();
 }
 
-function editFaq($mode,$faq_id='',$cat_id=0)
+function editFaq($data,$preview = false)
 {
     global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_FAQ, $LANG_ADMIN;
 
     $retval = '';
     $display = '';
 
+    $dt = new \Date('now',$_CONF['timezone']);
+
+    $result = DB_query("SELECT COUNT(*) AS count FROM {$_TABLES['faq_categories']}");
+    $catCountRec = DB_fetchArray($result);
+    $categoryCount = $catCountRec['count'];
+
+    if ($categoryCount == 0) {
+        return $LANG_FAQ['no_cats_admin' ];
+    }
+
     $outputHandle = outputHandler::getInstance();
     $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+
+    $A['id']            = $data['id'];
+    $A['cat_id']        = $data['cat_id'];
+    $A['draft']         = $data['draft'];
+    $A['last_updated']  = isset($data['last_updated']) ? $data['last_updated'] : $dt->toMySQL(true);
+    $A['question']      = $data['question'];
+    $A['answer']        = $data['answer'];
+    $A['owner_uid']     = isset($data['owner_id']) ? $data['owner_uid'] : $_USER['uid'];
+    $A['hits']          = isset($data['hits']) ? $data['hits'] : 0;
+    $A['helpful_yes']   = isset($data['helpful_yes']) ? $data['helpful_yes'] : 0;
+    $A['helpful_no']    = isset($data['helpful_no']) ? $data['helpful_no'] : 0;
+
+    if (isset($_POST['editor'])) {
+        $editMode = COM_applyFilter($_POST['editor']);
+    } else {
+        $editMode = 'html';
+    }
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
     $T->set_file ('form','edit_faq.thtml');
 
+    if ($preview == true) {
+        $filter = sanitizer::getInstance();
+        $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
+        $filter->setAllowedelements($AllowedElements);
+        $filter->setNamespace('faq','answer');
+        $filter->setReplaceTags(true);
+        $filter->setCensorData(true);
+        $filter->setPostmode('html');
+
+        $previewTemplate = new Template ($_CONF['path'] . 'plugins/faq/templates');
+        $previewTemplate->set_file('page','faq-article.thtml');
+
+        $dt = new \Date($A['last_updated'],$_USER['tzid']);
+
+        if ( !COM_isAnonUser() ) {
+            if ( empty( $_USER['format'] )) {
+                $dateformat = $_CONF['date'];
+            } else {
+                $dateformat = $_USER['format'];
+            }
+        } else {
+            $dateformat = $_CONF['date'];
+        }
+
+        $filter->setPostmode('text');
+        $question  = $filter->displayText($A['question']);
+
+        $cat_title = DB_getItem($_TABLES['faq_categories'],'title','cat_id='.(int) $A['cat_id']);
+        $cat_title = $filter->displayText($cat_title);
+
+        $filter->setPostmode('html');
+        $answer = $filter->displayText($filter->filterHTML($A['answer']));
+
+        $previewTemplate->set_var(array(
+            'id'                => $A['id'],
+            'question'          => $question,
+            'answer'            => $answer,
+            'cat_title'         => $cat_title,
+            'last_updated'      => $dt->format($dateformat,true),
+            'lang_last_updated' => $LANG_FAQ['last_updated'],
+        ));
+
+        $previewTemplate->parse('output', 'page');
+        $previewPage = $previewTemplate->finish($previewTemplate->get_var('output'));
+        $T->set_var('show_preview',true);
+    } else {
+        $previewPage = '';
+    }
+
     $T->set_var(array(
+        'preview_page'      => $previewPage,
         'lang_faq'          => $LANG_FAQ['faq'],
         'lang_category'     => $LANG_FAQ['category'],
         'lang_title'        => $LANG_FAQ['title'],
@@ -387,9 +482,13 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'lang_helpful_no'   => $LANG_FAQ['helpful_no'],
         'lang_reset_stats'  => $LANG_FAQ['reset_stats'],
         'lang_unsaved'      => $LANG_FAQ['unsaved_data'],
+        'lang_preview_help' => $LANG_FAQ['preview_help'],
+        'lang_preview'      => $LANG_FAQ['preview'],
+        'lang_faq_editor'   => $LANG_FAQ['faq_editor'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
         'faq_css'           => $_CONF['site_url'].'/faq/css/style.css',
+        'edit_mode'         => $editMode,
     ));
 
     $wysiwyg = PLG_requestEditor('faq', 'faq_editor', $_CONF['path'] . 'plugins/faq/templates/admin/faq_wysiwyg.thtml');
@@ -400,21 +499,8 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         $T->set_var('src','admin');
     }
 
-    if ($mode == 'faqedit' && ($faq_id != "" || $faq_id != 0)) {
-        $result = DB_query ("SELECT * FROM {$_TABLES['faq_questions']} WHERE id = ".(int) $faq_id);
-        $A = DB_fetchArray($result);
-    } else {
+    if ($A['id'] == 0) {
         $T->set_var('new_faq',true);
-        $A['id'] = '';
-        $A['cat_id'] = $cat_id;
-        $A['draft'] = 0;
-        $A['last_updated'] = date('Y-m-d');
-        $A['question']= '';
-        $A['answer'] = '';
-        $A['owner_uid']  = $_USER['uid'];
-        $A['hits'] = 0;
-        $A['helpful_yes'] = 0;
-        $A['helpful_no'] = 0;
     }
 
     $user_select= COM_optionList($_TABLES['users'], 'uid,username',$A['owner_uid']);
@@ -447,7 +533,8 @@ function editFaq($mode,$faq_id='',$cat_id=0)
     $filter->setCensorData(false);
     $filter->setPostmode('html');
 
-    $answer = $filter->editableText($A['answer']);
+    $question = $filter->editableText($A['question']);
+    $answer   = $filter->editableText($A['answer']);
 
     $T->set_var(array(
         'row_id'            => $A['id'],
@@ -455,22 +542,18 @@ function editFaq($mode,$faq_id='',$cat_id=0)
         'row_cat_id'        => $A['cat_id'],
         'row_draft'         => $A['draft'],
         'row_lastupdated'   => $A['last_updated'],
-        'row_question'      => $A['question'],
+        'row_question'      => $question,
         'row_answer'        => $answer,
         'row_hits'          => $A['hits'],
         'row_helpful_yes'   => $A['helpful_yes'],
         'row_helpful_no'    => $A['helpful_no'],
         'draft_checked'     => $draftChecked,
+        'row_owner_uid'     => $A['owner_uid'],
         'user_select'       => $user_select,
         'category_select'   => $category_select,
         'sec_token_name'    => CSRF_TOKEN,
         'sec_token'         => SEC_createToken(),
     ));
-
-    if (!empty($faq_id)) {
-        $T->set_var ('cancel_option', '<input type="submit" value="' . $LANG_FAQ['cancel'] . '" name="mode">');
-        $T->set_var('lang_cancel',$LANG_FAQ['cancel']);
-    }
 
     PLG_templateSetVars('faq_editor',$T);
 
@@ -482,7 +565,6 @@ function editFaq($mode,$faq_id='',$cat_id=0)
     $retval .= $T->finish($T->get_var('output'));
     return $retval;
 }
-
 
 function editCategory($mode,$cat_id='')
 {
@@ -697,19 +779,38 @@ function deleteFaq()
 
 function faq_admin_menu($action)
 {
-    global $_CONF, $_FAQ_CONF, $LANG_ADMIN, $LANG_FAQ;
+    global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ;
 
     $retval = '';
 
     $menu_arr = array(
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x','text' => $LANG_FAQ['faq_list'],'active' => ($action == 'faqlist' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catlist=x','text' => $LANG_FAQ['cat_list'],'active' => ($action == 'catlist' ? true : false)),
-        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqedit=x','text'=> ($action == 'edit_existing' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'faqedit' || $action == 'edit_existing' ? true : false)),
+        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x','text'=> ($action == 'editfaq' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'editfaq' || $action == 'newfaq' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catedit=x','text'=> ($action == 'edit_existing_cat' ? $LANG_FAQ['edit_cat'] : $LANG_FAQ['create_new_cat']), 'active'=> ($action == 'catedit' || $action == 'edit_existing_cat' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'], 'text' => $LANG_ADMIN['admin_home'])
     );
 
-    $retval = '<h2>'.$LANG_FAQ['faq_admin_title'].'</h2>';
+    switch($action) {
+        case 'faqlist' :
+            $panelTitle = $LANG_FAQ['faq_admin_title'];
+            break;
+        case 'catlist' :
+            $panelTitle = $LANG_FAQ['faq_admin_title'];
+            break;
+        case 'editfaq' :
+        case 'newfaq' :
+            $panelTitle = $LANG_FAQ['edit'];
+            break;
+        case 'catedit' :
+            $panelTitle = $LANG_FAQ['edit_existing_cat'];
+            break;
+        default :
+            $panelTitle = $LANG_FAQ['faq_admin_title'];
+            break;
+    }
+
+    $retval = '<h2>'.$panelTitle.'</h2>';
 
     $retval .= ADMIN_createMenu(
         $menu_arr,
@@ -756,7 +857,7 @@ $page = '';
 $display = '';
 $cmd ='faqlist';
 
-$expectedActions = array('faqlist','catlist','faqedit','catedit','deletefaq','save','delsel_x','delselcat_x');
+$expectedActions = array('faqlist','catlist','newfaq','editfaq','previewfaq','catedit','deletefaq','save','delsel_x','delselcat_x');
 foreach ( $expectedActions AS $action ) {
     if ( isset($_POST[$action])) {
         $cmd = $action;
@@ -780,19 +881,58 @@ if ( isset($_POST['cancel'])) {
     }
 }
 
+$dt = new \Date('now',$_CONF['timezone']);
+
 switch ( $cmd ) {
-    case 'faqedit' :
-        if (empty ($_GET['faqid'])) {
-            if (isset($_GET['cat_id'])) {
-                $cat_id = COM_applyFilter($_GET['cat_id'],true);
-            } else {
-                $cat_id = 0;
-            }
-            $page = editFaq ($cmd,0,$cat_id);
+
+    case 'newfaq' :
+        if (isset($_GET['cat_id'])) {
+            $cat_id = (int) COM_applyFilter($_GET['cat_id'],true);
         } else {
-            $page = editFaq ($cmd, (int) COM_applyFilter ($_GET['faqid']));
-            $cmd = 'edit_existing';
+            $cat_id = 0;
         }
+        $A['id']            = 0;
+        $A['cat_id']        = $cat_id;
+        $A['draft']         = 0;
+        $A['last_updated']  = $dt->toMySQL(true);
+        $A['question']      = '';
+        $A['answer']        = '';
+        $A['owner_uid']     = $_USER['uid'];
+        $A['hits']          = 0;
+        $A['helpful_yes']   = 0;
+        $A['helpful_no']    = 0;
+        $page = editFaq($A,false);
+        $pageTitle = $LANG_FAQ['edit'];
+        break;
+
+    case 'editfaq' :
+        if (!isset($_GET['faqid'])) {
+            COM_setMsg($LANG_FAQ['error_invalid_faqid'],'error',true);
+            $page = listFaq();
+        } else {
+            $faq_id = (int) COM_applyFilter($_GET['faqid'],true);
+            $result = DB_query ("SELECT * FROM {$_TABLES['faq_questions']} WHERE id = ".(int) $faq_id);
+            if ((DB_numRows($result)) == 1 ) {
+                $A = DB_fetchArray($result);
+                $page = editFaq($A,false); // no preview
+                $pageTitle = $LANG_FAQ['edit'];
+            } else {
+                COM_setMsg($LANG_FAQ['error_invalid_faqid'],'error',true);
+                $page = listFaq();
+            }
+        }
+        break;
+
+    case 'previewfaq' :
+        $A = $_POST;
+        $A['draft'] = (isset($_POST['draft']) ? 1 : 0);
+        if ($A['id'] == 0 ) {
+            $cmd = 'newfaq';
+        } else {
+            $cmd = 'editfaq';
+        }
+        $page = editFaq($A,true);
+        $pageTitle = $LANG_FAQ['edit'];
         break;
 
     case 'catedit' :
@@ -853,7 +993,9 @@ switch ( $cmd ) {
         break;
 }
 
-$display  = COM_siteHeader ('menu', $LANG_FAQ['admin']);
+if (!isset($pageTitle)) $pageTitle = $LANG_FAQ['admin'];
+
+$display  = COM_siteHeader ('menu', $pageTitle);
 $display .= faq_admin_menu($cmd);
 $display .= $page;
 $display .= COM_siteFooter (false);

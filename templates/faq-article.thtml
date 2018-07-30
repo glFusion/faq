@@ -2,11 +2,11 @@
 <div class="faq faq-article">
 
 	<h2>{cat_title}</h2>
-
+{!if lang_back_to_home}
 	<a href="{site_url}/faq/index.php">
 		<i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}
 	</a>
-
+{!endif}
 	<hr>
 
 {!if not_found}
@@ -28,7 +28,7 @@
 	</div>
 
 	<hr class="uk-margin-bottom-large">
-
+{!if lang_helpful}
 	<form class="uk-form">
 		<input type="hidden" id="faqid" name="faqid" value="{id}">
 		<div id="faq-feedback" class="uk-margin-top">
@@ -37,10 +37,13 @@
 			<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
 		</div>
 	</form>
+{!endif}
 
+{!if lang_back_to_home}
 	<div class="uk-margin-large">
 		<a href="{site_url}/faq/index.php"><i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}</a>
 	</div>
+{!endif}
 {!endif}
 </div>
 <script>
