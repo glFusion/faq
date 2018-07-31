@@ -110,6 +110,7 @@ $LANG_confignames['faq'] = array(
     'whatsnew_interval'   => 'What\'s New Interval (Days)',
     'max_columns_category' => 'Max Category Columns in "Category in Columns" View',
     'max_columns_question' => 'Max Question Columns "Single Category" View',
+    'default_edit_mode'   => 'Default Editor',
 );
 
 $LANG_configsubgroups['faq'] = array(
@@ -132,5 +133,6 @@ $LANG_configselects['faq'] = array(
     6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
     7  => array('Category in Columns' => 0, 'Single Category Column' => 1),
     8  => array('4' => 4, '3' => 3, '2' => 2, '1' => 1),
+    9  => array('WYSIWYG' => 'wysiwyg', 'HTML' => 'html'),
 );
 ?>

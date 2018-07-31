@@ -1,6 +1,6 @@
 <style>.cke_contents { padding: 10px !important; }</style>
 <script src="{site_url}/ckeditor/ckeditor.js"></script>
-<script >
+<script>
 	var site_url = "{site_url}";
 	var answer;
 	function loadEditor(id) {
@@ -19,6 +19,9 @@
 			entities: false,
 			basicEntities: false,
 			disableReadonlyStyling :true,
+			font_defaultLabel: 'Arial',
+			fontSize_defaultLabel:'16px',
+			font_names: 'Arial/Arial, Helvetica, sans-serif;Times New Roman/Times New Roman, Times, serif; Verdana;  Consolas',
 		} );
 		return instance;
 	}

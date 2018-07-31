@@ -52,6 +52,9 @@ if (!isset($_FAQ_CONF['max_columns_category'])) {
 if (!isset($_FAQ_CONF['max_columns_question'])) {
     $_FAQ_CONF['max_columns_question'] = 3;
 }
+if (!isset($_FAQ_CONF['default_edit_mode'])) {
+    $_FAQ_CONF['default_edit_mode'] = 'wysiwyg';
+}
 
 if ( !isset($_FAQ_CONF['displayblocks'])) $_FAQ_CONF['displayblocks'] = 'menu';
 
@@ -592,6 +595,14 @@ function plugin_ismoderator_faq()
 
     if ( SEC_hasRights('faq.admin') ) return true;
     return false;
+}
+
+function plugin_templatesetvars_faq($ctype, &$template)
+{
+    global $_CONF;
+    if ($ctype =='ckeditor') {
+        $template->set_var('faq_css',$_CONF['site_url'].'/faq/css/style.css');
+    }
 }
 
 /*

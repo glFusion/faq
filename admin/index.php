@@ -410,7 +410,7 @@ function editFaq($data,$preview = false)
     if (isset($_POST['editor'])) {
         $editMode = COM_applyFilter($_POST['editor']);
     } else {
-        $editMode = 'html';
+        $editMode = $_FAQ_CONF['default_edit_mode'];
     }
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
