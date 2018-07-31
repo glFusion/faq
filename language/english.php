@@ -108,6 +108,8 @@ $LANG_confignames['faq'] = array(
     'question_sort_field' => 'FAQ Sort Field',
     'whatsnew_enabled'    => 'Include in What\'s New Block',
     'whatsnew_interval'   => 'What\'s New Interval (Days)',
+    'max_columns_category' => 'Max Category Columns in "Category in Columns" View',
+    'max_columns_question' => 'Max Question Columns "Single Category" View',
 );
 
 $LANG_configsubgroups['faq'] = array(
@@ -129,5 +131,6 @@ $LANG_configselects['faq'] = array(
     5  => array('Descending' => 'DESC', 'Ascending' => 'ASC'),
     6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
     7  => array('Category in Columns' => 0, 'Single Category Column' => 1),
+    8  => array('4' => 4, '3' => 3, '2' => 2, '1' => 1),
 );
 ?>

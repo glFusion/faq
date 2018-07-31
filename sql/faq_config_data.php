@@ -97,13 +97,35 @@ $faqConfigData = array(
         'group' => 'faq'
     ),
     array(
+        'name' => 'max_columns_category',
+        'default_value' => '3',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 8,
+        'sort' => 60,
+        'set' => TRUE,
+        'group' => 'faq'
+    ),
+    array(
+        'name' => 'max_columns_question',
+        'default_value' => '3',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 8,
+        'sort' => 70,
+        'set' => TRUE,
+        'group' => 'faq'
+    ),
+    array(
         'name' => 'allowed_html',
         'default_value' => 'div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub',
         'type' => 'text',
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => NULL,
-        'sort' => 60,
+        'sort' => 80,
         'set' => TRUE,
         'group' => 'faq'
     ),

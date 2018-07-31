@@ -186,14 +186,11 @@ function faqIndex($category = 0) {
     }
 
     $numCategory = count($categoryResults);
-    if ($numCategory >= 3) {
-        $T->set_var('cat_columns',3);
-    } else if ($numCategory == 2) {
-        $T->set_var('cat_columns',2);
-    } else if ($numCategory == 1 || $numCategory == 0) {
-        $T->set_var('cat_columns',1);
+
+    if ($numCategory >= $_FAQ_CONF['max_columns_category']) {
+        $T->set_var('cat_columns',$_FAQ_CONF['max_columns_category']);
     } else {
-        $T->set_var('cat_columns',3);
+        $T->set_var('cat_columns',$numCategory);
     }
 
     foreach ($categoryResults AS $category) {
@@ -209,7 +206,7 @@ function faqIndex($category = 0) {
             'lang_create_new_faq' => $LANG_FAQ['create_new_faq'],
         ));
 
-        if(SEC_inGroup('FAQ Admin')) {
+        if (SEC_inGroup('FAQ Admin')) {
             $T->set_var('add_item_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x&cat_id='.$category['cat_id'].'&src=faq');
         } else {
             $T->unset_var('add_item_link');
@@ -232,6 +229,21 @@ function faqIndex($category = 0) {
         $T->set_block('page','questions','qs');
 
         if (count($faqResults) > 0 ) {
+            // maximum questions across all categories
+            $sql = "SELECT COUNT(id) `count` FROM {$_TABLES['faq_questions']} GROUP BY cat_id ORDER BY `count` DESC LIMIT 1";
+            $maxQuesResult = DB_query($sql);
+            if (DB_numRows($maxQuesResult) == 1) {
+                $maxRow = DB_fetchArray($maxQuesResult);
+                $numQuestions = $maxRow['count'];
+            } else {
+                $numQuestions = 3;
+            }
+            if ($numQuestions >= $_FAQ_CONF['max_columns_question']) {
+                $T->set_var('ques_columns',$_FAQ_CONF['max_columns_question']);
+            } else {
+                $T->set_var('ques_columns',$numQuestions);
+            }
+
             $T->unset_var('lang_no_faqs');
             foreach ($faqResults AS $faq) {
                 $filter->setPostmode('text');

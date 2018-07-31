@@ -96,8 +96,8 @@
 		<div class="uk-margin-right-small uk-hidden-small tm-admin-save" data-uk-scrollspy="{cls:'uk-animation-slide-bottom', delay:900}">
 			<ul>
 				<li><button onclick="actionClick('save');" class="uk-button uk-button-success button tm-admin-save-button-width" type="submit" value="{lang_save}" id="save" name="save" data-uk-tooltip="{pos:'left'}" title="{lang_save}"><i class="uk-icon-save"></i></button></li>
-				<li><button onclick="actionClick('previewfaq');" class="uk-button button cancel tm-admin-save-button-width" type="submit" value="{lang_preview}" name="preview" data-uk-tooltip="{pos:'left'}" title="{lang_preview}"><i class="uk-icon-eye"></i></button></li>
-				<li><button onclick="actionClick('cancel');return false;" class="uk-button button uk-button-primary cancel tm-admin-save-button-width" type="submit" value="{lang_cancel}" id="cancel" name="cancel" data-uk-tooltip="{pos:'left'}" title="{lang_cancel}"><i class="uk-icon-undo"></i></button></li>
+				<li><button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel tm-admin-save-button-width" type="submit" value="{lang_preview}" name="preview" data-uk-tooltip="{pos:'left'}" title="{lang_preview}"><i class="uk-icon-eye"></i></button></li>
+				<li><button onclick="actionClick('cancel');return false;" class="uk-button button uk-button-danger cancel tm-admin-save-button-width" type="submit" value="{lang_cancel}" id="cancel" name="cancel" data-uk-tooltip="{pos:'left'}" title="{lang_cancel}"><i class="uk-icon-undo"></i></button></li>
 			</ul>
 		</div>
 	{# end save side bar #}

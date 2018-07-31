@@ -43,9 +43,14 @@ if (!isset($_FAQ_CONF['layout'])) {
 if (!isset($_FAQ_CONF['show_question_icon'])) {
     $_FAQ_CONF['show_question_icon'] = 0;
 }
-
 if (!isset($_FAQ_CONF['allowed_html'])) {
     $_FAQ_CONF['allowed_html'] = 'div[class],h1,h2,h3,pre,br,p[style],b[style],s,strong[style],i[style],em[style],u[style],strike,a[id|name|style|href|title|target],ol[style|class],ul[style|class],li[style|class],hr[style],blockquote[style],img[style|alt|title|width|height|src|align],table[style|width|bgcolor|align|cellspacing|cellpadding|border],tr[style],td[style],th[style],tbody,thead,caption,col,colgroup,span[style|class],sup,sub';
+}
+if (!isset($_FAQ_CONF['max_columns_category'])) {
+    $_FAQ_CONF['max_columns_category'] = 3;
+}
+if (!isset($_FAQ_CONF['max_columns_question'])) {
+    $_FAQ_CONF['max_columns_question'] = 3;
 }
 
 if ( !isset($_FAQ_CONF['displayblocks'])) $_FAQ_CONF['displayblocks'] = 'menu';

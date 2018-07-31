@@ -12,7 +12,26 @@
 {!endif}
 		</h2>
 
-		<ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3 faq-question-list">
+{#	<ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3 faq-question-list"> #}
+
+{!!if {ques_columns} == 4 !!}
+  <ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-4  faq-question-list">
+{!else}
+{!!if {ques_columns} == 3 !!}
+  <ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3  faq-question-list">
+{!else}
+{!!if {ques_columns} == 2 !!}
+  <ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-2 uk-grid-width-large-1-2  faq-question-list">
+{!else}
+{!!if {ques_columns} == 1 !!}
+  <ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-1-1">
+{!else}
+  <ul class="uk-margin-remove uk-margin-left uk-grid uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-3 faq-question-list">
+{!endif}
+{!endif}
+{!endif}
+{!endif}
+
 
 			<!-- BEGIN questions -->
 {!if question}
