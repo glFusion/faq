@@ -45,7 +45,8 @@ $_SQL['faq_questions'] = "CREATE TABLE {$_TABLES['faq_questions']} (
     helpful_yes mediumint(8) unsigned NOT NULL default '0',
     helpful_no mediumint(8) unsigned NOT NULL default '0',
     hits mediumint(8) unsigned NOT NULL default 0,
-    PRIMARY KEY  (id)
+    PRIMARY KEY  (id),
+	INDEX `cat_id` (`cat_id`)
 ) ENGINE=MyISAM
 ";
 
