@@ -232,7 +232,7 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
 
     switch ($fieldname) {
         case 'cat_id' :
-            $url = $_CONF['site_admin_url'].'/plugins/faq/index.php?catedit=x&catid='.$A['cat_id'];
+            $url = $_CONF['site_admin_url'].'/plugins/faq/index.php?editcat=x&catid='.$A['cat_id'];
             $retval = '<a href="'.$url.'"><i class="uk-icon uk-icon-pencil"></i></a>';
             break;
 
@@ -315,7 +315,6 @@ function saveFaq()
     $draft      = (isset($_POST['draft']) ? 1 : 0);
 
     $_POST['draft'] = $draft;
-//    $_POST['last_updated'] = $dt->toMySQL(true);
 
     // form validation
     if ($cat_id <= 0) {
@@ -333,7 +332,7 @@ function saveFaq()
 
     $filter = new sanitizer();
 
-     $last_updated = $dt->toMySQL(true);
+    $last_updated = $dt->toMySQL(true);
 
     $owner_id = $_USER['uid'];
 
@@ -495,8 +494,15 @@ function editFaq($data,$preview = false)
 
     if (isset($_GET['src']) && $_GET['src'] == 'faq') {
         $T->set_var('src','faq');
-    }  else {
+    } else if (isset($_POST['src']) && $_POST['src'] == 'faq' ) {
+        $T->set_var('src','faq');
+    } else {
         $T->set_var('src','admin');
+    }
+    if (isset($_POST['mod']) && $_POST['mod'] == '1') {
+        $T->set_var('mod',1);
+    } else {
+        $T->set_var('mod',0);
     }
 
     if ($A['id'] == 0) {
@@ -566,12 +572,29 @@ function editFaq($data,$preview = false)
     return $retval;
 }
 
-function editCategory($mode,$cat_id='')
+function editCategory($data)
 {
     global $_CONF, $_FAQ_CONF, $_USER, $_TABLES, $LANG_FAQ;
 
     $retval = '';
     $display = '';
+
+    $dt = new \Date('now',$_CONF['timezone']);
+
+    $outputHandle = outputHandler::getInstance();
+    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+
+    $A['cat_id']        = $data['cat_id'];
+    $A['title']         = $data['title'];
+    $A['description']   = $data['description'];
+    $A['sort_order']    = $data['sort_order'];
+    $A['owner_id']      = $data['owner_id'];
+    $A['group_id']      = $data['group_id'];
+    $A['perm_owner']    = $data['perm_owner'];
+    $A['perm_group']    = $data['perm_group'];
+    $A['perm_members']  = $data['perm_members'];
+    $A['perm_anon']     = $data['perm_anon'];
+    $A['last_updated']  = $dt->toMySQL(true);
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
     $T->set_file ('form','edit_category.thtml');
@@ -589,30 +612,6 @@ function editCategory($mode,$cat_id='')
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
     ));
-    if ($mode == 'catedit' && ($cat_id != "" || $cat_id != 0)) {
-        $result = DB_query ("SELECT * FROM {$_TABLES['faq_categories']} WHERE cat_id = ".(int) $cat_id);
-        $A = DB_fetchArray($result);
-    } else {
-        $sort_order = 10;
-        $sql = "SELECT sort_order, MAX(sort_order) AS max FROM {$_TABLES['faq_categories']};";
-        $result = DB_query($sql);
-        if (DB_numRows($result) > 0 ) {
-            $max = DB_fetchArray($result);
-            $sort_order = (int) $max['max'] + 10;
-        }
-
-        $A['cat_id'] = '';
-        $A['title'] = '';
-        $A['description'] = '';
-        $A['sort_order'] = $sort_order;
-        $A['owner_id'] = $_USER['uid'];
-        $A['group_id'] = DB_getItem($_TABLES['groups'],'grp_id','grp_name = "FAQ Admin"');
-        $A['perm_owner'] = $_FAQ_CONF['default_permissions_category'][0];
-        $A['perm_group'] = $_FAQ_CONF['default_permissions_category'][1];
-        $A['perm_members'] = $_FAQ_CONF['default_permissions_category'][2];
-        $A['perm_anon'] = $_FAQ_CONF['default_permissions_category'][3];
-        $A['last_updated'] = 0;
-    }
 
     $user_select  = COM_optionList($_TABLES['users'], 'uid,username',$A['owner_id']);
     $group_select = COM_optionList($_TABLES['groups'],'grp_id,grp_name',$A['group_id']);
@@ -662,21 +661,44 @@ function saveCategory()
 {
     global $_CONF, $_TABLES, $LANG_FAQ;
 
-    // we need to do some error checking here - make sure everything
-    // is set and in proper format (such as date).
+    $cat_id      = isset($_POST['cat_id']) ? (int) COM_applyFilter($_POST['cat_id'],true) : -1;
+    $title       = isset($_POST['title']) ? $_POST['title'] : '';
+    $description = isset($_POST['description']) ? $_POST['description'] : '';
+    $sort_order  = isset($_POST['sort_order']) ? (int) COM_applyFilter($_POST['sort_order'],true) + 1 : 0;
+    $owner_id    = isset($_POST['owner_id']) ? (int) COM_applyFilter($_POST['owner_id'],true) : 0;
+    $group_id    = isset($_POST['group_id']) ? (int) COM_applyFilter($_POST['group_id'],true) : 0;
 
-    $cat_id      = (int) COM_applyFilter($_POST['cat_id'],true);
-    $title       = $_POST['title'];
-    $description = $_POST['description'];
-    $sort_order  = (int) COM_applyFilter($_POST['sort_order'],true) + 1;
-    $owner_id    = (int) COM_applyFilter($_POST['owner'],true);
-    $group_id    = (int) COM_applyFilter($_POST['group'],true);
+    if (isset($_POST['perm_owner']) && isset($_POST['perm_group']) && isset($_POST['perm_members']) && isset($_POST['perm_anon'])) {
+        list($perm_owner, $perm_group, $perm_members, $perm_anon) =
+            SEC_getPermissionValues(    $_POST['perm_owner'],
+                                        $_POST['perm_group'],
+                                        $_POST['perm_members'],
+                                        $_POST['perm_anon'] );
 
-    list($perm_owner, $perm_group, $perm_members, $perm_anon) =
-        SEC_getPermissionValues(    $_POST['perm_owner'],
-                                    $_POST['perm_group'],
-                                    $_POST['perm_members'],
-                                    $_POST['perm_anon'] );
+        $_POST['perm_owner'] = $perm_owner;
+        $_POST['perm_group'] = $perm_group;
+        $_POST['perm_members'] = $perm_members;
+        $_POST['perm_anon'] = $perm_anon;
+    } else {
+        die('Invalid data');
+    }
+    if ($cat_id == -1) {
+        die('Invalid data');
+    }
+    if ($owner_id == 0) {
+        die('Invalid data');
+    }
+    if ($group_id == 0) {
+        die('Invalid data');
+    }
+    if ($title == '') {
+        COM_setMsg($LANG_FAQ['error_no_title'],'error',true);
+        return editCategory($_POST);
+    }
+    if ($description == '') {
+        COM_setMsg($LANG_FAQ['error_no_description'],'error',true);
+        return editCategory($_POST);
+    }
 
     $filter = new sanitizer();
 
@@ -787,26 +809,32 @@ function faq_admin_menu($action)
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x','text' => $LANG_FAQ['faq_list'],'active' => ($action == 'faqlist' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catlist=x','text' => $LANG_FAQ['cat_list'],'active' => ($action == 'catlist' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x','text'=> ($action == 'editfaq' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'editfaq' || $action == 'newfaq' ? true : false)),
-        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catedit=x','text'=> ($action == 'edit_existing_cat' ? $LANG_FAQ['edit_cat'] : $LANG_FAQ['create_new_cat']), 'active'=> ($action == 'catedit' || $action == 'edit_existing_cat' ? true : false)),
+        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newcat=x','text'=> ($action == 'editcat' ? $LANG_FAQ['edit_cat'] : $LANG_FAQ['create_new_cat']), 'active'=> ($action == 'editcat' || $action == 'newcat' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'], 'text' => $LANG_ADMIN['admin_home'])
     );
 
     switch($action) {
         case 'faqlist' :
             $panelTitle = $LANG_FAQ['faq_admin_title'];
+            $helpText   = $LANG_FAQ['admin_help_faq_list'];
             break;
         case 'catlist' :
             $panelTitle = $LANG_FAQ['faq_admin_title'];
+            $helpText   = $LANG_FAQ['admin_help_cat_list'];
             break;
         case 'editfaq' :
         case 'newfaq' :
             $panelTitle = $LANG_FAQ['edit'];
+            $helpText   = $LANG_FAQ['admin_help_faq_edit'];
             break;
-        case 'catedit' :
+        case 'editcat' :
+        case 'newcat' :
             $panelTitle = $LANG_FAQ['edit_existing_cat'];
+            $helpText   = $LANG_FAQ['admin_help_cat_edit'];
             break;
         default :
             $panelTitle = $LANG_FAQ['faq_admin_title'];
+            $helpText   = $LANG_FAQ['admin_help'];
             break;
     }
 
@@ -814,7 +842,7 @@ function faq_admin_menu($action)
 
     $retval .= ADMIN_createMenu(
         $menu_arr,
-        $LANG_FAQ['admin_help'],
+        $helpText,
         $_CONF['site_url'] . '/faq/images/faq.png'
     );
 
@@ -857,7 +885,7 @@ $page = '';
 $display = '';
 $cmd ='faqlist';
 
-$expectedActions = array('faqlist','catlist','newfaq','editfaq','previewfaq','catedit','deletefaq','save','delsel_x','delselcat_x');
+$expectedActions = array('faqlist','catlist','newfaq','editfaq','previewfaq','editcat','newcat','deletefaq','save','delsel_x','delselcat_x');
 foreach ( $expectedActions AS $action ) {
     if ( isset($_POST[$action])) {
         $cmd = $action;
@@ -935,12 +963,46 @@ switch ( $cmd ) {
         $pageTitle = $LANG_FAQ['edit'];
         break;
 
-    case 'catedit' :
-        if (empty ($_GET['catid'])) {
-            $page = editCategory ($cmd);
+    case 'newcat' :
+        $sort_order = 10;
+        $sql = "SELECT sort_order, MAX(sort_order) AS max FROM {$_TABLES['faq_categories']};";
+        $result = DB_query($sql);
+        if (DB_numRows($result) > 0 ) {
+            $max = DB_fetchArray($result);
+            $sort_order = (int) $max['max'] + 10;
+        }
+        $A['cat_id']        = 0;
+        $A['title']         = '';
+        $A['description']   = '';
+        $A['sort_order']    = $sort_order;
+        $A['owner_id']      = $_USER['uid'];
+        $A['group_id']      = DB_getItem($_TABLES['groups'],'grp_id','grp_name = "FAQ Admin"');
+
+        $A['perm_owner']    = $_FAQ_CONF['default_permissions_category'][0];
+        $A['perm_group']    = $_FAQ_CONF['default_permissions_category'][1];
+        $A['perm_members']  = $_FAQ_CONF['default_permissions_category'][2];
+        $A['perm_anon']     = $_FAQ_CONF['default_permissions_category'][3];
+        $A['last_updated']  = 0;
+
+        $page = editCategory($A);
+        $pageTitle = $LANG_FAQ['edit_cat'];
+        break;
+
+    case 'editcat' :
+        if (!isset($_GET['catid'])) {
+            COM_setMsg($LANG_FAQ['error_invalid_catid'],'error',true);
+            $page = listCategories();
         } else {
-            $page = editCategory ($cmd, (int) COM_applyFilter ($_GET['catid']));
-            $cmd = 'edit_existing_cat';
+            $cat_id = (int) COM_applyFilter($_GET['catid'],true);
+            $result = DB_query ("SELECT * FROM {$_TABLES['faq_categories']} WHERE cat_id = ".(int) $cat_id);
+            if ((DB_numRows($result)) == 1 ) {
+                $A = DB_fetchArray($result);
+                $page = editCategory($A);
+                $pageTitle = $LANG_FAQ['edit_cat'];
+            } else {
+                COM_setMsg($LANG_FAQ['error_invalid_catid'],'error',true);
+                $page = listCategories();
+            }
         }
         break;
 
