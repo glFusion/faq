@@ -632,15 +632,28 @@ function FAQ_truncate($string, $length, $trimmarker = '') {
 }
 
 
-function faq_parse($str, $format='text')
+function faq_parse($str, $postmode='text')
 {
-    global $_CONF;
+    global $_CONF, $_FAQ_CONF;
+
+    if (version_compare(GVERSION,'2.0.0','ge')) {
+        $format = new glFusion\Formatter();
+        $format->setNamespace('faq');
+        $format->setAction('answer');
+        $format->setAllowedHTML($_FAQ_CONF['allowed_html']);
+        $format->setType($postmode);
+        $format->enableCache(false);
+        $format->setProcessBBCode(false);
+        $format->setParseURLs(true);
+        $format->setConvertPre(true);
+        return $format->parse($str);
+    }
 
     $bbcode = new \StringParser_BBCode();
     $bbcode->setGlobalCaseSensitive (false);
     $filter = \sanitizer::getInstance();
 
-    $filter->setPostmode($format);
+    $filter->setPostmode($postmode);
 
     if ($format == 'text') {
         $bbcode->addFilter(1, 'faq_htmlspecialchars');
