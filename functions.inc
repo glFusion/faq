@@ -288,28 +288,34 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
         return array('faq');
     } else if ($op == 'tagusage') {
         $tagUsage = array(
-            array('namespace' => 'faq','usage' => 'answer')
+        array('namespace' => 'faq','usage' => 'answer')
         );
         return $tagUsage;
     } else if ($op == 'desc' ) {
         switch ($content) {
             case 'faq' :
-                return $LANG_FAQ['desc_faq'];
-                break;
+            return $LANG_FAQ['desc_faq'];
+            break;
             default :
-                return '';
-                break;
+            return '';
+            break;
         }
     } else if ($op == 'parse') {
         if (($autotag['tag'] == 'faq')) {
             $target = '';
             $target_window = '';
             $skip = 0;
+
             $autotag['parm2'] = str_replace("&nbsp;",' ',$autotag['parm2']);
+
             $faq_id = (int) COM_applyFilter($autotag['parm1'],true);
+
             $faqData = plugin_getiteminfo_faq($faq_id, 'url,title');
+
             if (count($faqData) == 2) {
-                $px = explode (' ', trim ($autotag['parm2']));
+                $caption = $autotag['parm2'];
+
+                $px = explode (' ', trim(rtrim($autotag['parm2'])));
                 if (is_array ($px)) {
                     foreach ($px as $part) {
                         if (substr ($part, 0, 7) == 'target:') {
@@ -329,24 +335,25 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
                         } else {
                             $caption = $faqData['title'];
                         }
-                    } else {
-                        $caption = $faqData['title'];
                     }
                 } else {
-                    $caption = trim ($autotag['parm2']);
+                    $caption = trim (rtrim($autotag['parm2']));
                 }
+
                 if ($target_window != '') {
                     $target = 'target="'.$target_window.'"';
                 }
 
+                if (trim(rtrim($caption)) == '') {
+                    $caption = $faqData['title'];
+                }
                 $link = '<a href="' . $faqData['url'] . '" ' . $target . ' >' . $caption . '</a>';
                 $content = str_replace ($autotag['tagstr'], $link, $content);
             }
+            return $content;
         }
-        return $content;
     }
     return;
-
 }
 
 /**
