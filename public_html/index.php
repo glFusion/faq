@@ -45,20 +45,6 @@ function faqItem($id)
     $outputHandle = outputHandler::getInstance();
     $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
 
-    $c = \glFusion\Cache::getInstance();
-    $key = 'faq'.(int)$id.'_'.$c->securityHash(true,true);
-    if ( $c->has($key)) {
-        return $c->get($key);
-    }
-
-    $filter = sanitizer::getInstance();
-    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
-    $filter->setAllowedelements($AllowedElements);
-    $filter->setNamespace('faq','answer');
-    $filter->setReplaceTags(true);
-    $filter->setCensorData(true);
-    $filter->setPostmode('html');
-
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates');
     $T->set_file('page','faq-article.thtml');
 
@@ -98,12 +84,10 @@ function faqItem($id)
             if ($faqRecord['owner_uid'] != $_USER['uid']) {
                 DB_change($_TABLES['faq_questions'], 'hits', 'hits + 1', 'id', (int) $faqRecord['id'], '', true);
             }
-            $filter->setPostmode('text');
-            $question  = $filter->displayText($faqRecord['question']);
-            $cat_title = $filter->displayText($faqRecord['title']);
 
-            $filter->setPostmode('html');
-            $answer = $filter->displayText($filter->filterHTML($faqRecord['answer']));
+            $question   = faq_parse($faqRecord['question'],'text');
+            $cat_title  = faq_parse($faqRecord['title'],'text');
+            $answer     = faq_parse($faqRecord['answer'],'html');
 
             $T->set_var(array(
                 'id'                => $faqRecord['id'],
@@ -128,8 +112,6 @@ function faqItem($id)
 
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
-
-    $c->set($key,$page,array('faq','faq'.(int)$id));
 
     return $page;
 }

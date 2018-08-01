@@ -417,14 +417,6 @@ function editFaq($data,$preview = false)
     $T->set_file ('form','edit_faq.thtml');
 
     if ($preview == true) {
-        $filter = sanitizer::getInstance();
-        $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
-        $filter->setAllowedelements($AllowedElements);
-        $filter->setNamespace('faq','answer');
-        $filter->setReplaceTags(true);
-        $filter->setCensorData(true);
-        $filter->setPostmode('html');
-
         $previewTemplate = new Template ($_CONF['path'] . 'plugins/faq/templates');
         $previewTemplate->set_file('page','faq-article.thtml');
 
@@ -440,14 +432,11 @@ function editFaq($data,$preview = false)
             $dateformat = $_CONF['date'];
         }
 
-        $filter->setPostmode('text');
-        $question  = $filter->displayText($A['question']);
-
         $cat_title = DB_getItem($_TABLES['faq_categories'],'title','cat_id='.(int) $A['cat_id']);
-        $cat_title = $filter->displayText($cat_title);
 
-        $filter->setPostmode('html');
-        $answer = $filter->displayText($filter->filterHTML($A['answer']));
+        $question = faq_parse($A['question'],'text');
+        $cat_title = faq_parse($cat_title,'text');
+        $answer = faq_parse($A['answer'],'html');
 
         $previewTemplate->set_var(array(
             'id'                => $A['id'],

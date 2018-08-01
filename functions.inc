@@ -630,4 +630,118 @@ function FAQ_truncate($string, $length, $trimmarker = '') {
     }
     return $string;
 }
+
+
+function faq_parse($str, $format='text')
+{
+    global $_CONF;
+
+    $bbcode = new \StringParser_BBCode();
+    $bbcode->setGlobalCaseSensitive (false);
+    $filter = \sanitizer::getInstance();
+
+    $filter->setPostmode($format);
+
+    if ($format == 'text') {
+        $bbcode->addFilter(1, 'faq_htmlspecialchars');
+    }
+
+    if ($format == 'html') {
+        $str = str_replace('<pre>','[code]',$str);
+        $str = str_replace('</pre>','[/code]',$str);
+    }
+
+    if ($format != 'html') {
+        $bbcode->addParser(array('block','inline','link','listitem'), 'faq_nl2br');
+    }
+
+    $bbcode->addParser (array('block','inline','listitem'), array ($filter, 'linkify'));
+
+    $bbcode->addCode ('code', 'usecontent?', 'do_faq_code', array ('usecontent_param' => 'default'),
+                      'code', array('listitem', 'block', 'inline', 'quote'), array ('link'));
+
+    if ($format == 'html') {
+       $bbcode->addParser(array('block','inline','list','listitem'), 'faq_cleanHTML');
+    }
+
+    $str = $filter->censor($str);
+
+    $str = $bbcode->parse ($str);
+
+    unset($bbcode);
+
+    $str = PLG_replaceTags($str,'faq','answer');
+
+    return $str;
+}
+
+/**
+ * Encode string
+ * @param $text
+ * @return string
+ */
+function faq_htmlspecialchars($text)
+{
+    return (@htmlspecialchars ($text,ENT_NOQUOTES, COM_getEncodingt(),true));
+}
+
+
+/**
+ * Converts newline to <br>
+ */
+function faq_nl2br($str)
+{
+    return str_replace(array("\r\n", "\r", "\n"), "<br>", $str);
+}
+
+/**
+* Cleans (filters) HTML - only allows HTML tags specified in the
+* in allowedHTML string.  This function is designed to be called
+* by the stringparser class to filter everything except [code] blocks.
+*
+* @param        string      $message        The topic post to filter
+* @return       string      filtered HTML code
+*/
+function faq_cleanHTML($message)
+{
+    global $_CONF, $_FAQ_CONF;
+
+    $filter = \sanitizer::getInstance();
+
+    $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
+    $filter->setAllowedelements($AllowedElements);
+    $filter->setPostmode('html');
+    return $filter->filterHTML($message);
+}
+
+/**
+ * [code] tag
+ */
+function do_faq_code($action, $attributes, $content, $params, $node_object)
+{
+    global $_FAQ_CONF;
+
+    if ($action == 'validate') {
+        return true;
+    }
+
+    static $insideCode = 0;
+
+    if ($insideCode > 0 ) return $content;
+
+    $insideCode = 1;
+
+    $content = @htmlspecialchars_decode($content,ENT_QUOTES);
+    $content = preg_replace('/^\s*?\n|\s*?\n$/','',$content);
+    $codeblock = '<div style="width:100%;" class="php"><pre class="codeblock">'  . @htmlspecialchars ($content,ENT_NOQUOTES, COM_getEncodingt(),true) . '</pre></div>';
+
+    $codeblock = str_replace('{','&#123;',$codeblock);
+    $codeblock = str_replace('}','&#125;',$codeblock);
+    $codeblock = str_replace('[','&#91;',$codeblock);
+    $codeblock = str_replace(']','&#93;',$codeblock);
+
+    $insideCode = 0;
+    return $codeblock;
+}
+
 ?>
