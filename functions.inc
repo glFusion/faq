@@ -646,6 +646,7 @@ function faq_parse($str, $postmode='text')
         $format->setProcessBBCode(false);
         $format->setParseURLs(true);
         $format->setConvertPre(true);
+        $format->setParseAutoTags(true);
         return $format->parse($str);
     }
 
