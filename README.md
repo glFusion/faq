@@ -54,6 +54,18 @@ Determines if the FAQ questions are sorting in ascending order or descending ord
 
 Select the FAQ Index page layout. Category Columns will use up to 3 columns to show the categories with the answers listed below each category. Single column category will show a Category on a line with the questions listed below in up to 3 columns.
 
+**Max Category Columns in "Category in Columns" View**
+
+This setting determines the maximum number of Category columns that will be used in the "Category in Columns" view.
+
+**Max Question Columns "Single Category" View
+
+This setting determines the maximum number of columns for questions in the "Single Category" view.
+
+**Default Editor**
+
+Determines which editor is the default for editing FAQ Articles. WYSIWYG will start the edit session using the What You See is What You Get editor. HTML will start the edit session with the plain HTML raw editor.
+
 **Allowed HTML**
 
 List of HTML tags allowed to be used in FAQ answers.
@@ -69,9 +81,6 @@ The number of days that a new / updated FAQ will appear in the What's New block.
 **Default Category Permissions**
 
 Sets the default permissions to use when creating a new category. Order is Owner -- Group -- Member -- Anonymous.
-
-
-
 
 ### License
 
