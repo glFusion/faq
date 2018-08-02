@@ -42,8 +42,9 @@ function faqItem($id)
 
     $page = '';
 
+    $styleSheet = faq_getStylesheet();
     $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+    $outputHandle->addLinkStyle($styleSheet);
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates');
     $T->set_file('page','faq-article.thtml');
@@ -127,8 +128,9 @@ function faqIndex($category = 0) {
 
     $page = '';
 
+    $styleSheet = faq_getStylesheet();
     $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+    $outputHandle->addLinkStyle($styleSheet);
 
     $c = \glFusion\Cache::getInstance();
     $key = 'faqindex'.'_'.$c->securityHash(true,true);

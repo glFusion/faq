@@ -608,8 +608,24 @@ function plugin_templatesetvars_faq($ctype, &$template)
 {
     global $_CONF;
     if ($ctype =='ckeditor') {
-        $template->set_var('faq_css',$_CONF['site_url'].'/faq/css/style.css');
+        $styleSheet = faq_getStyleSheet();
+        $template->set_var('faq_css',$styleSheet);
     }
+}
+
+function faq_getStylesheet()
+{
+    global $_CONF;
+
+    $styleSheet = $_CONF['site_url'].'/faq/css/style.css';
+
+    if ( @file_exists($_CONF['path_layout'].'plugins/faq/style.css') ) {
+        $styleSheet = $_CONF['layout_url'].'/plugins/faq/style.css';
+    } else if ( @file_exists($_CONF['path_html'] . 'faq/css/custom/style.css') ) {
+        $styleSheet = $_CONF['site_url'] . '/faq/css/custom/style.css';
+    }
+
+    return $styleSheet;
 }
 
 /*
@@ -631,7 +647,9 @@ function FAQ_truncate($string, $length, $trimmarker = '') {
     return $string;
 }
 
-
+/*
+ * FAQ parser for pre-glFusion v2 sites
+ */
 function faq_parse($str, $postmode='text')
 {
     global $_CONF, $_FAQ_CONF;

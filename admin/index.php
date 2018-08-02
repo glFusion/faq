@@ -393,8 +393,9 @@ function editFaq($data,$preview = false)
         return $LANG_FAQ['no_cats_admin' ];
     }
 
+    $styleSheet = faq_getStylesheet();
     $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+    $outputHandle->addLinkStyle($styleSheet);
 
     $A['id']            = $data['id'];
     $A['cat_id']        = $data['cat_id'];
@@ -475,7 +476,7 @@ function editFaq($data,$preview = false)
         'lang_faq_editor'   => $LANG_FAQ['faq_editor'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
-        'faq_css'           => $_CONF['site_url'].'/faq/css/style.css',
+        'faq_css'           => $styleSheet,
         'edit_mode'         => $editMode,
     ));
 
@@ -570,8 +571,9 @@ function editCategory($data)
 
     $dt = new \Date('now',$_CONF['timezone']);
 
+    $styleSheet = faq_getStylesheet();
     $outputHandle = outputHandler::getInstance();
-    $outputHandle->addLinkStyle($_CONF['site_url'].'/faq/css/style.css');
+    $outputHandle->addLinkStyle($styleSheet);
 
     $A['cat_id']        = $data['cat_id'];
     $A['title']         = $data['title'];
@@ -1020,6 +1022,7 @@ switch ( $cmd ) {
         if (SEC_checkToken()) {
             deleteCategory();
         }
+        $cmd = 'catlist';
         $page = listCategories();
         break;
 
@@ -1027,6 +1030,7 @@ switch ( $cmd ) {
         if (SEC_checkToken()) {
             deleteFaq();
         }
+        $cmd = 'faqlist';
         $page = listFaq();
         break;
 
