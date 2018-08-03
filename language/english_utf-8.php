@@ -28,6 +28,7 @@ $LANG_FAQ = array (
     'admin_help_faq_list'   => 'FAQ Article list. You can sort this view based on category or helpful or not helpful. Select FAQ Articles to edit or delete.',
     'answer'                => 'Answer',
     'back_to_home'          => 'Back to FAQ Home',
+    'back_to_admin'         => 'Back to FAQ Admin List',
     'cancel'			    => 'Cancel',
     'cat_id'                => 'Category ID',
     'cat_list'              => 'Category List',

@@ -287,7 +287,10 @@ function FAQ_getListField($fieldname, $fieldvalue, $A, $icon_arr, $token = "")
 
         case 'question' :
             $filter->setPostMode('text');
-            $retval = $filter->displayText($fieldvalue);
+            $title = $filter->displayText($fieldvalue);
+            $link = COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $A['id'].'&amp;src=adm');
+            $retval = '<a href="'.$link.'">'.$title.'</a>';
+//            $retval = $filter->displayText($fieldvalue);
             break;
 
         case 'hits' :
@@ -591,6 +594,10 @@ function editCategory($data)
 
     $T = new Template ($_CONF['path'] . 'plugins/faq/templates/admin');
     $T->set_file ('form','edit_category.thtml');
+
+    if ($A['cat_id'] == 0) {
+        $T->set_var('new_cat',true);
+    }
 
     $T->set_var(array(
         'lang_category'     => $LANG_FAQ['category'],

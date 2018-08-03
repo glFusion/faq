@@ -21,11 +21,14 @@ if (!in_array('faq', $_PLUGINS)) {
     exit;
 }
 
-COM_setArgNames( array('id') );
-$id = (int) COM_applyFilter(COM_getArgument( 'id' ),true);
+$src = '';
+
+COM_setArgNames( array('id','src') );
+$id  = (int) COM_applyFilter(COM_getArgument('id'),true);
+$src = COM_applyFilter(COM_getArgument('src'));
 
 if ($id != 0) {
-    $page = faqItem($id);
+    $page = faqItem($id,$src);
 } else {
     $page = faqIndex();
 }
@@ -36,7 +39,7 @@ if ($id != 0) {
  * @param  int   $id
  * @return string faq page
  */
-function faqItem($id)
+function faqItem($id,$src='')
 {
     global $_CONF, $_FAQ_CONF, $_TABLES, $_USER, $LANG_FAQ;
 
@@ -52,7 +55,14 @@ function faqItem($id)
     // set it here - we'll clear it if we find a FAQ
     $T->set_var('not_found',$LANG_FAQ['no_faq_found']);
 
-    $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
+    if ($src == 'adm') {
+        $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_admin']);
+        $T->set_var('return_url', $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x');
+    } else {
+        $src = 'faq';
+        $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
+        $T->set_var('return_url',$_CONF['site_url'].'/faq/index.php');
+    }
 
     $id = (int) COM_applyFilter($id,true);
 
@@ -105,7 +115,7 @@ function faqItem($id)
             ));
 
             if ($permission == 3) {
-                $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?editfaq=x&faqid='.$faqRecord['id'].'&src=faq');
+                $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?editfaq=x&faqid='.$faqRecord['id'].'&src='.$src);
             }
             $T->unset_var('not_found');
         }
