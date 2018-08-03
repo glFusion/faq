@@ -106,7 +106,9 @@
 			<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>
 			<button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel" type="submit" value="x" name="previewfaq" title="{lang_preview}">{lang_preview}</button>
 			<button onclick="actionClick('cancel');return false;" type="submit" class="uk-button button cancel" id="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+{!if !new_faq}
 			<button class="uk-button uk-button-danger cancel" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletefaq" value="delete">{lang_delete}</button>
+{!endif}
 		</div>
 	</form>
 </div>
