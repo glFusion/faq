@@ -102,13 +102,19 @@
 		</div>
 	{# end save side bar #}
 
-		<div class="uk-form-row uk-text-left uk-margin-top">
-			<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>
-			<button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel" type="submit" value="x" name="previewfaq" title="{lang_preview}">{lang_preview}</button>
-			<button onclick="actionClick('cancel');return false;" type="submit" class="uk-button button cancel" id="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+		<div class="uk-form-row uk-margin-top">
+			<div class="uk-grid">
+				<div class="uk-width-small-3-4">
+					<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>
+					<button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel" type="submit" value="x" name="previewfaq" title="{lang_preview}">{lang_preview}</button>
+					<button onclick="actionClick('cancel');return false;" type="submit" class="uk-button button cancel" id="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+				</div>
+				<div class="uk-width-small-1-4 uk-text-right">
 {!if !new_faq}
-			<button class="uk-button uk-button-danger cancel" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletefaq" value="delete">{lang_delete}</button>
+					<button class="uk-button uk-button-danger cancel uk-text-right" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletefaq" value="delete">{lang_delete}</button>
 {!endif}
+				</div>
+			</div>
 		</div>
 	</form>
 </div>

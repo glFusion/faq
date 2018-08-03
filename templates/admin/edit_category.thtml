@@ -54,11 +54,17 @@
 		</div>
 
 		<div class="uk-form-row uk-margin-top">
-			<button class="uk-button uk-button-primary button" type="submit" name="save" value="x">{lang_save}</button>
-			<button class="uk-button button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+			<div class="uk-grid">
+				<div class="uk-width-small-3-4">
+					<button class="uk-button uk-button-primary button" type="submit" name="save" value="x">{lang_save}</button>
+					<button class="uk-button button cancel" onclick="actionClick('cancel');return false;" tabindex="4" type="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+				</div>
+				<div class="uk-width-small-1-4 uk-text-right">
 {!if !new_cat}
-			<button class="uk-button uk-button-danger cancel" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletecat" value="delete">{lang_delete}</button>
+					<button class="uk-button uk-button-danger cancel" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletecat" value="delete">{lang_delete}</button>
 {!endif}
+				</div>
+			</div>
 		</div>
 	</form>
 </div>
