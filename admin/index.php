@@ -465,6 +465,8 @@ function editFaq($data,$preview = false)
         'lang_draft'        => $LANG_FAQ['draft'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
+        'lang_delete'       => $LANG_FAQ['delete'],
+        'lang_delete_confirm' => $LANG_FAQ['delete_confirm_faq'],
         'lang_timeout'      => $LANG_ADMIN['timeout_msg'],
         'lang_hits'         => $LANG_FAQ['views'],
         'lang_helpful_yes'  => $LANG_FAQ['helpful_yes'],
@@ -602,6 +604,8 @@ function editCategory($data)
         'lang_unsaved'      => $LANG_FAQ['unsaved_data'],
         'lang_save'         => $LANG_FAQ['save'],
         'lang_cancel'       => $LANG_FAQ['cancel'],
+        'lang_delete'       => $LANG_FAQ['delete'],
+        'lang_delete_confirm' => $LANG_FAQ['delete_confirm_cat'],
     ));
 
     $user_select  = COM_optionList($_TABLES['users'], 'uid,username',$A['owner_id']);
@@ -768,6 +772,40 @@ function deleteCategory()
     return;
 }
 
+function deleteSingleCat()
+{
+    global $_CONF, $_TABLES, $LANG_FAQ;
+
+    $c = glFusion\Cache::getInstance();
+
+    $cat_id = 0;
+
+    if (!isset($_POST['cat_id'])) {
+        COM_setMsg($LANG_FAQ['error_invalid_catid'],'error',true);
+    } else {
+        $cat_id = (int) COM_applyFilter($_POST['cat_id'],true);
+        // pull full CAT record to ensure it exists
+        $result = DB_query ("SELECT * FROM {$_TABLES['faq_categories']} WHERE cat_id = ".(int) $cat_id);
+        if ((DB_numRows($result)) != 1 ) {
+            COM_setMsg($LANG_FAQ['error_invalid_catid'],'error',true);
+        } else {
+            // remove all FAQs associated with this category
+            $faqResult = DB_query("SELECT id FROM {$_TABLES['faq_questions']} WHERE cat_id = " . (int) $cat_id);
+            $faqRecords = DB_fetchAll($faqResult);
+            foreach ($faqRecords AS $faq) {
+                DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE id=".(int) $faq['id']. " AND cat_id=".(int) $cat_id);
+                PLG_itemDeleted($faq['id'],'faq');
+                $c->deleteItemsByTag('faq'.$faq['id']);
+            }
+            // delete the category
+            DB_query("DELETE FROM {$_TABLES['faq_categories']} WHERE cat_id=".(int) $cat_id);
+            $c->deleteItemsByTags(array('faqindex','menu','whatsnew'));
+        }
+    }
+    return;
+}
+
+
 function deleteFaq()
 {
     global $_CONF, $_TABLES;
@@ -790,6 +828,34 @@ function deleteFaq()
     return;
 }
 
+function deleteSingleFaq()
+{
+    global $_CONF, $_TABLES, $LANG_FAQ;
+
+    $c = glFusion\Cache::getInstance();
+
+    $faq_id = 0;
+
+    if (!isset($_POST['id'])) {
+        COM_setMsg($LANG_FAQ['error_invalid_faqid'],'error',true);
+    } else {
+        $faq_id = (int) COM_applyFilter($_POST['id'],true);
+        // pull full FAQ record to ensure it exists
+        $result = DB_query ("SELECT * FROM {$_TABLES['faq_questions']} WHERE id = ".(int) $faq_id);
+        if ((DB_numRows($result)) != 1 ) {
+            COM_setMsg($LANG_FAQ['error_invalid_faqid'],'error',true);
+        } else {
+            DB_query("DELETE FROM {$_TABLES['faq_questions']} WHERE id=".(int) $faq_id);
+            PLG_itemDeleted($faq_id,'faq');
+            $c->deleteItemsByTags(array('faq'.(int) $faq_id,'faqindex','menu','whatsnew'));
+        }
+    }
+
+    if (isset($_POST['src']) && $_POST['src'] == 'faq') {
+        echo COM_refresh($_CONF['site_url'].'/faq/index.php');
+    }
+}
+
 function faq_admin_menu($action)
 {
     global $_CONF, $_FAQ_CONF, $_TABLES, $LANG_ADMIN, $LANG_FAQ;
@@ -799,7 +865,7 @@ function faq_admin_menu($action)
     $menu_arr = array(
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x','text' => $LANG_FAQ['faq_list'],'active' => ($action == 'faqlist' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?catlist=x','text' => $LANG_FAQ['cat_list'],'active' => ($action == 'catlist' ? true : false)),
-        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x','text'=> ($action == 'editfaq' ? $LANG_FAQ['edit'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'editfaq' || $action == 'newfaq' ? true : false)),
+        array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newfaq=x','text'=> ($action == 'editfaq' ? $LANG_FAQ['edit_faq'] : $LANG_FAQ['create_new']), 'active'=> ($action == 'editfaq' || $action == 'newfaq' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'].'/plugins/faq/index.php?newcat=x','text'=> ($action == 'editcat' ? $LANG_FAQ['edit_cat'] : $LANG_FAQ['create_new_cat']), 'active'=> ($action == 'editcat' || $action == 'newcat' ? true : false)),
         array( 'url' => $_CONF['site_admin_url'], 'text' => $LANG_ADMIN['admin_home'])
     );
@@ -815,7 +881,7 @@ function faq_admin_menu($action)
             break;
         case 'editfaq' :
         case 'newfaq' :
-            $panelTitle = $LANG_FAQ['edit'];
+            $panelTitle = $LANG_FAQ['edit_faq'];
             $helpText   = $LANG_FAQ['admin_help_faq_edit'];
             break;
         case 'editcat' :
@@ -876,7 +942,7 @@ $page = '';
 $display = '';
 $cmd ='faqlist';
 
-$expectedActions = array('faqlist','catlist','newfaq','editfaq','previewfaq','editcat','newcat','deletefaq','save','delsel_x','delselcat_x');
+$expectedActions = array('faqlist','catlist','newfaq','editfaq','previewfaq','editcat','newcat','deletefaq','deletecat','save','delsel_x','delselcat_x');
 foreach ( $expectedActions AS $action ) {
     if ( isset($_POST[$action])) {
         $cmd = $action;
@@ -921,7 +987,7 @@ switch ( $cmd ) {
         $A['helpful_yes']   = 0;
         $A['helpful_no']    = 0;
         $page = editFaq($A,false);
-        $pageTitle = $LANG_FAQ['edit'];
+        $pageTitle = $LANG_FAQ['edit_faq'];
         break;
 
     case 'editfaq' :
@@ -934,7 +1000,7 @@ switch ( $cmd ) {
             if ((DB_numRows($result)) == 1 ) {
                 $A = DB_fetchArray($result);
                 $page = editFaq($A,false); // no preview
-                $pageTitle = $LANG_FAQ['edit'];
+                $pageTitle = $LANG_FAQ['edit_faq'];
             } else {
                 COM_setMsg($LANG_FAQ['error_invalid_faqid'],'error',true);
                 $page = listFaq();
@@ -951,7 +1017,7 @@ switch ( $cmd ) {
             $cmd = 'editfaq';
         }
         $page = editFaq($A,true);
-        $pageTitle = $LANG_FAQ['edit'];
+        $pageTitle = $LANG_FAQ['edit_faq'];
         break;
 
     case 'newcat' :
@@ -1034,9 +1100,22 @@ switch ( $cmd ) {
         $page = listFaq();
         break;
 
-    case 'delete' :
-        $page = 'Not implemented yet';
+    case 'deletefaq' :
+        if (SEC_checkToken()) {
+            deleteSingleFaq();
+        }
+        $page = listFaq();
+        $cmd = 'faqlist';
         break;
+
+    case 'deletecat' :
+        if (SEC_checkToken()) {
+            deleteSingleCat();
+        }
+        $page = listCategories();
+        $cmd = 'catlist';
+        break;
+
 
     case 'catlist' :
         $page = listCategories();

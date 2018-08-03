@@ -10,7 +10,7 @@
 	<hr>
 
 {!if not_found}
-	<h1>{not_found}</h1>
+	<h2>{not_found}</h2>
 {!else}
 	<h1>{question}</h1>
 

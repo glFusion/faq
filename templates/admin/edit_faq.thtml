@@ -97,7 +97,7 @@
 			<ul>
 				<li><button onclick="actionClick('save');" class="uk-button uk-button-success button tm-admin-save-button-width" type="submit" value="{lang_save}" id="save" name="save" data-uk-tooltip="{pos:'left'}" title="{lang_save}"><i class="uk-icon-save"></i></button></li>
 				<li><button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel tm-admin-save-button-width" type="submit" value="{lang_preview}" name="preview" data-uk-tooltip="{pos:'left'}" title="{lang_preview}"><i class="uk-icon-eye"></i></button></li>
-				<li><button onclick="actionClick('cancel');return false;" class="uk-button button uk-button-danger cancel tm-admin-save-button-width" type="submit" value="{lang_cancel}" id="cancel" name="cancel" data-uk-tooltip="{pos:'left'}" title="{lang_cancel}"><i class="uk-icon-undo"></i></button></li>
+				<li><button onclick="actionClick('cancel');return false;" class="uk-button button cancel tm-admin-save-button-width" type="submit" value="{lang_cancel}" id="cancel" name="cancel" data-uk-tooltip="{pos:'left'}" title="{lang_cancel}"><i class="uk-icon-undo"></i></button></li>
 			</ul>
 		</div>
 	{# end save side bar #}
@@ -105,10 +105,8 @@
 		<div class="uk-form-row uk-text-left uk-margin-top">
 			<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>
 			<button onclick="actionClick('previewfaq');" class="uk-button uk-button-primary button cancel" type="submit" value="x" name="previewfaq" title="{lang_preview}">{lang_preview}</button>
-			<button onclick="actionClick('cancel');return false;" type="submit" class="uk-button uk-button-danger button cancel" id="cancel" name="cancel" value="{src}">{lang_cancel}</button>
-{!if delete_option}
-			<button class="uk-button uk-button-danger cancel" name="delete">{lang_delete}</button>
-{!endif}
+			<button onclick="actionClick('cancel');return false;" type="submit" class="uk-button button cancel" id="cancel" name="cancel" value="{src}">{lang_cancel}</button>
+			<button class="uk-button uk-button-danger cancel" type="submit" onclick="return confirm('{lang_delete_confirm}');" name="deletefaq" value="delete">{lang_delete}</button>
 		</div>
 	</form>
 </div>
