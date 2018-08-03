@@ -268,7 +268,7 @@ function plugin_getwhatsnew_faq() {
         $question = $filter->displayText($faq['question']);
 
         $url = COM_buildURL($_CONF['site_url'].'/faq/index.php?id=' . $faq['id']);
-        $item = '<a href="'.$url.'" title="'.$question.'">'.$question.'</a>';
+        $item = '<a href="'.$url.'" title="'.htmlspecialchars($question).'">'.$question.'</a>';
         $items[] = $item;
     }
     if (count($items) != 0 ) {
