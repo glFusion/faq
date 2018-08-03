@@ -662,7 +662,7 @@ function faq_parse($str, $postmode='text')
         $format->setType($postmode);
         $format->enableCache(false);
         $format->setProcessBBCode(false);
-        $format->setParseURLs(true);
+        $format->setParseURLs(false);
         $format->setConvertPre(true);
         $format->setParseAutoTags(true);
         return $format->parse($str);
@@ -687,7 +687,7 @@ function faq_parse($str, $postmode='text')
         $bbcode->addParser(array('block','inline','link','listitem'), 'faq_nl2br');
     }
 
-    $bbcode->addParser (array('block','inline','listitem'), array ($filter, 'linkify'));
+//    $bbcode->addParser (array('block','inline','listitem'), array ($filter, 'linkify'));
 
     $bbcode->addCode ('code', 'usecontent?', 'do_faq_code', array ('usecontent_param' => 'default'),
                       'code', array('listitem', 'block', 'inline', 'quote'), array ('link'));
