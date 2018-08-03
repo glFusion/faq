@@ -14,6 +14,7 @@ Frequently asked questions (FAQ), are a set of common or recurring questions and
 - Full Permission controls by category
 - FAQ auto tag to allow integration into other content areas
 - Multiple layout options to suit your needs
+- Intuitive user interface
 
 ### System Requirements
 
