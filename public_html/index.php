@@ -66,7 +66,7 @@ function faqItem($id,$src='')
 
     $id = (int) COM_applyFilter($id,true);
 
-    $result = DB_query("SELECT * FROM {$_TABLES['faq_questions']} AS f LEFT JOIN {$_TABLES['faq_categories']} AS c ON f.cat_id=c.cat_id WHERE f.id = ".(int) $id);
+    $result = DB_query("SELECT *,f.last_updated AS updated FROM {$_TABLES['faq_questions']} AS f LEFT JOIN {$_TABLES['faq_categories']} AS c ON f.cat_id=c.cat_id WHERE f.id = ".(int) $id);
 
     if (DB_numRows($result) == 1) {
         $faqRecord = DB_fetchArray($result);
@@ -81,7 +81,7 @@ function faqItem($id,$src='')
 
         if ($permission != 0) {
 
-            $dt = new \Date($faqRecord['last_updated'],$_USER['tzid']);
+            $dt = new \Date($faqRecord['updated'],$_USER['tzid']);
 
             if ( !COM_isAnonUser() ) {
                 if ( empty( $_USER['format'] )) {
@@ -270,7 +270,7 @@ function faqIndex($category = 0) {
     $T->parse('output', 'page');
     $page = $T->finish($T->get_var('output'));
 
-    $c->set($key,$page,array('faq','faqindex'));
+    $c->set($key,$page,array('faq','faqindex'),86400);
 
     return $page;
 }
