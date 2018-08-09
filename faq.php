@@ -24,7 +24,7 @@ global $_DB_table_prefix, $_TABLES;
 
 $_FAQ_CONF['pi_name']            = 'faq';
 $_FAQ_CONF['pi_display_name']    = 'FAQ';
-$_FAQ_CONF['pi_version']         = '1.0.1';
+$_FAQ_CONF['pi_version']         = '1.0.2';
 $_FAQ_CONF['gl_version']         = '1.7.5';
 $_FAQ_CONF['pi_url']             = 'https://www.glfusion.org/';
 
