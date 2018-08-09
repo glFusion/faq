@@ -674,16 +674,16 @@ function faq_parse($str, $postmode='text')
 
     $filter->setPostmode($postmode);
 
-    if ($format == 'text') {
+    if ($postmode == 'text') {
         $bbcode->addFilter(1, 'faq_htmlspecialchars');
     }
 
-    if ($format == 'html') {
+    if ($postmode == 'html') {
         $str = str_replace('<pre>','[code]',$str);
         $str = str_replace('</pre>','[/code]',$str);
     }
 
-    if ($format != 'html') {
+    if ($postmode != 'html') {
         $bbcode->addParser(array('block','inline','link','listitem'), 'faq_nl2br');
     }
 
@@ -692,7 +692,7 @@ function faq_parse($str, $postmode='text')
     $bbcode->addCode ('code', 'usecontent?', 'do_faq_code', array ('usecontent_param' => 'default'),
                       'code', array('listitem', 'block', 'inline', 'quote'), array ('link'));
 
-    if ($format == 'html') {
+    if ($postmode == 'html') {
        $bbcode->addParser(array('block','inline','list','listitem'), 'faq_cleanHTML');
     }
 
