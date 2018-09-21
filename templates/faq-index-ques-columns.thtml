@@ -2,6 +2,16 @@
 <div class="faq">
 	<h1 class="faq-title uk-margin-small-top">{faq_title}</h1>
 
+{!if search_enabled}
+	<form class="uk-form uk-margin" method="get" action="{site_url}/faq/search.php">
+		<input type="hidden" name="search" value="search">
+		<div class="uk-form-icon uk-width-1-1">
+			<i class="uk-icon-search"></i>
+			<input type="text" name="q" placeholder="{lang_search_the} {faq_title}" class="uk-width-1-1 uk-form-large">
+		</div>
+	</form>
+{!endif}
+
 	<!-- BEGIN category -->
 
 	<div class="faq-category-block uk-margin-large-bottom">

@@ -79,6 +79,7 @@ $LANG_FAQ = array (
     'no_cats_admin'         => 'No Categories exist - Please create a Category before creating a FAQ',
     'no_faq_found'          => 'The requested FAQ was not found. Please return to the FAQ Home and try your selection again.',
     'no_faqs'               => 'No FAQs for this Category',
+    'no_results_found'      => 'No Results Found',
     'number_of_questions'   => 'Questions',
     'owner'                 => 'Category Owner',
     'permissions'           => 'Permissions',
@@ -87,6 +88,9 @@ $LANG_FAQ = array (
     'question'              => 'Question',
     'reset_stats'           => 'Reset Helpful Stats',
     'save'		            => 'Save',
+    'search_results'        => 'Search Results',
+    'search_the'            => 'Search the',
+    'silent_edit'           => 'Silent Edit',
     'sort_order'            => 'Order',
     'thank_you'             => 'Thank you for your feedback!',
     'title'                 => 'Title',
@@ -115,6 +119,7 @@ $LANG_confignames['faq'] = array(
     'max_columns_category' => 'Max Category Columns in "Category in Columns" View',
     'max_columns_question' => 'Max Question Columns "Single Category" View',
     'default_edit_mode'   => 'Default Editor',
+    'enable_search'       => 'Enable Search',
 );
 
 $LANG_configsubgroups['faq'] = array(

@@ -58,11 +58,26 @@ function faqItem($id,$src='')
     if ($src == 'adm') {
         $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_admin']);
         $T->set_var('return_url', $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x');
+    } elseif ($src == 'sr') {
+        $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
+        $q = SESS_getVar('faq_search_field');
+        $T->set_var('return_url',$_CONF['site_url'].'/faq/index.php');
+        $T->set_var('src','sr');
+        $T->set_var('query_string',$q);
     } else {
         $src = 'faq';
         $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
         $T->set_var('return_url',$_CONF['site_url'].'/faq/index.php');
     }
+
+    if (isset($_FAQ_CONF['faq_title']) && $_FAQ_CONF['faq_title'] != '') {
+        $T->set_var('faq_title',$_FAQ_CONF['faq_title']);
+    } else {
+        $T->set_var('faq_title',$LANG_FAQ['faq_title']);
+    }
+
+    $T->set_var('lang_search_results',$LANG_FAQ['search_results']);
+
 
     $id = (int) COM_applyFilter($id,true);
 
@@ -177,6 +192,13 @@ function faqIndex($category = 0) {
         $T->set_var('faq_title',$_FAQ_CONF['faq_title']);
     } else {
         $T->set_var('faq_title',$LANG_FAQ['faq_title']);
+    }
+
+    if (isset($_FAQ_CONF['enable_search']) && $_FAQ_CONF['enable_search']) {
+        $T->set_var(array(
+            'search_enabled' => true,
+            'lang_search_the' => $LANG_FAQ['search_the'],
+        ));
     }
 
     $numCategory = count($categoryResults);

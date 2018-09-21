@@ -1,0 +1,54 @@
+{# begin {templatelocation} #}
+<div class="faq">
+	<h1 class="faq-title uk-margin-small-top">{faq_title}</h1>
+
+	<ul class="uk-breadcrumb">
+		<li><a href="{site_url}/faq/index.php">{faq_title}</a></li>
+		<li>{lang_search_results}</li>
+	</ul>
+
+	<form class="uk-form uk-margin" method="get" action="{site_url}/faq/search.php">
+		<input type="hidden" name="search" value="search">
+		<div class="uk-form-icon uk-width-1-1">
+			<i class="uk-icon-search"></i>
+			<input type="text" name="q" placeholder="{lang_search_the} {faq_title}" value="{query}" class="uk-width-1-1 uk-form-large">
+		</div>
+	</form>
+
+{!if query_string}
+	<div class="uk-alert uk-alert-danger">
+		{query_string}
+	</div>
+{!endif}
+
+
+{!if xxlang_back_to_home}
+	<a href="{return_url}">
+		<i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}
+	</a>
+{!endif}
+	<hr>
+
+	<ul class="uk-grid uk-grid-width-1-1">
+
+		<!-- BEGIN searchresults -->
+		<li class="uk-margin">
+			<a href="{faq_article_url}" class="uk-text-large uk-text-bold">
+				{search_question}
+			</a> ({relevance})
+			<div>
+				{search_answer}
+			</div>
+
+		</li>
+		<!-- END searchresults -->
+	</ul>
+
+{!if no_results_found}
+	<div class="uk-alert uk-alert-warning">
+		{lang_no_results_found}
+	</div>
+{!endif}
+
+</div>
+{# end {templatelocation} #}
