@@ -103,6 +103,16 @@
 	{# end save side bar #}
 
 		<div class="uk-form-row uk-margin-top">
+
+{!if !new_faq}
+			<div class="uk-form-row uk-margin-bottom">
+				<label class="uk-form-label uk-text-bold">
+					{lang_silent_edit}
+				</label>
+				<input class="uk-text-right" type="checkbox" name="silent_update" id="silent_update" tabindex="6" {silent_checked}>
+			</div>
+{!endif}
+
 			<div class="uk-grid">
 				<div class="uk-width-small-3-4">
 					<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>

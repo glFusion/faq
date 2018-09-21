@@ -356,9 +356,12 @@ function saveFaq()
                ."cat_id=".(int) $cat_id.","
                ."draft=".(int) $draft.","
                ."question='".$filter->prepareForDB($question)."',"
-               ."answer='".$filter->prepareForDB($answer)."',"
-               ."last_updated='".$filter->prepareForDB($last_updated)."'"
-               ." WHERE id=".(int) $faq_id;
+               ."answer='".$filter->prepareForDB($answer)."'";
+        if (!isset($_POST['silent_update'])) {
+            $sql .= ",last_updated='".$filter->prepareForDB($last_updated)."'";
+        }
+
+        $sql .= " WHERE id=".(int) $faq_id;
         $result = DB_query($sql);
     }
     PLG_itemSaved($faq_id,'faq');
@@ -410,6 +413,7 @@ function editFaq($data,$preview = false)
     $A['hits']          = isset($data['hits']) ? $data['hits'] : 0;
     $A['helpful_yes']   = isset($data['helpful_yes']) ? $data['helpful_yes'] : 0;
     $A['helpful_no']    = isset($data['helpful_no']) ? $data['helpful_no'] : 0;
+    $A['silent_update'] = isset($data['silent_update']) ? 1 : 0;
 
     if (isset($_POST['editor'])) {
         $editMode = COM_applyFilter($_POST['editor']);
@@ -423,6 +427,14 @@ function editFaq($data,$preview = false)
     if ($preview == true) {
         $previewTemplate = new Template ($_CONF['path'] . 'plugins/faq/templates');
         $previewTemplate->set_file('page','faq-article.thtml');
+
+        $previewTemplate->set_var('preview',true);
+
+        if (isset($_FAQ_CONF['faq_title']) && $_FAQ_CONF['faq_title'] != '') {
+            $previewTemplate->set_var('faq_title',$_FAQ_CONF['faq_title']);
+        } else {
+            $previewTemplate->set_var('faq_title',$LANG_FAQ['faq_title']);
+        }
 
         $dt = new \Date($A['last_updated'],$_USER['tzid']);
 
@@ -479,6 +491,7 @@ function editFaq($data,$preview = false)
         'lang_preview_help' => $LANG_FAQ['preview_help'],
         'lang_preview'      => $LANG_FAQ['preview'],
         'lang_faq_editor'   => $LANG_FAQ['faq_editor'],
+        'lang_silent_edit'  => $LANG_FAQ['silent_edit'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
         'faq_css'           => $styleSheet,
@@ -524,6 +537,10 @@ function editFaq($data,$preview = false)
     if ( $A['draft'] ) {
         $draftChecked = ' checked="checked" ';
     }
+    $silentChecked = '';
+    if ($A['silent_update']) {
+        $silentChecked = ' checked="checked" ';
+    }
 
     $filter = \sanitizer::getInstance();
     $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
@@ -549,6 +566,7 @@ function editFaq($data,$preview = false)
         'row_helpful_yes'   => $A['helpful_yes'],
         'row_helpful_no'    => $A['helpful_no'],
         'draft_checked'     => $draftChecked,
+        'silent_checked'    => $silentChecked,
         'row_owner_uid'     => $A['owner_uid'],
         'user_select'       => $user_select,
         'category_select'   => $category_select,
