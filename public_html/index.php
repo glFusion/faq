@@ -58,9 +58,10 @@ function faqItem($id,$src='')
     if ($src == 'adm') {
         $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_admin']);
         $T->set_var('return_url', $_CONF['site_admin_url'].'/plugins/faq/index.php?faqlist=x');
-    } elseif ($src == 'sr') {
+    } elseif ($src == 'sr' && SESS_isSet('faq_search_field')) {
         $T->set_var('lang_back_to_home', $LANG_FAQ['back_to_home']);
         $q = SESS_getVar('faq_search_field');
+        SESS_unSet('faq_search_field');
         $T->set_var('return_url',$_CONF['site_url'].'/faq/index.php');
         $T->set_var('src','sr');
         $T->set_var('query_string',$q);
@@ -127,12 +128,40 @@ function faqItem($id,$src='')
                 'lang_last_updated' => $LANG_FAQ['last_updated'],
                 'lang_edit'         => $LANG_FAQ['edit'],
                 'lang_thank_you'    => $LANG_FAQ['thank_you'],
+                'lang_related_faqs' => $LANG_FAQ['related_faqs'],
             ));
 
             if ($permission == 3) {
                 $T->set_var('edit_link',$_CONF['site_admin_url'].'/plugins/faq/index.php?editfaq=x&faqid='.$faqRecord['id'].'&src='.$src);
             }
             $T->unset_var('not_found');
+
+            // build related section
+            $keywordsArray = explode(',',$faqRecord['keywords']);
+            $kwCounter = 0;
+            $kwSQL = '';
+            foreach ($keywordsArray AS $keyword) {
+                if (!empty($keyword)) {
+                    if ($kwCounter > 0) {
+                        $kwSQL .= ' OR';
+                    }
+                    $kwSQL .= ' f.keywords LIKE "%'.DB_escapeString($keyword).'%" ';
+                    $kwCounter++;
+                }
+            }
+            if ($kwCounter > 0) {
+                $permSQL = COM_getPermSQL('AND',$_USER['uid'],2,'c');
+                $sql = "SELECT * FROM {$_TABLES['faq_questions']} AS f LEFT JOIN {$_TABLES['faq_categories']} AS c ON f.cat_id=c.cat_id WHERE f.id != ".(int) $faqRecord['id']." ".$permSQL. " AND (".$kwSQL.") LIMIT 5";
+                $kwResult = DB_query($sql);
+                $T->set_block('page','related','rel');
+                while (($row = DB_fetchArray($kwResult,false)) != null) {
+                    $T->set_var('kwQuestion',$row['question']);
+                    $T->set_var('kwID', $row['id']);
+                    $T->set_var('kwURL',COM_buildURL($_CONF['site_url'].'/faq/index.php?id='.(int) $row['id']));
+                    $T->parse('rel','related',true);
+                    $T->set_var('related_faqs',true);
+                }
+            }
         }
     }
 

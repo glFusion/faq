@@ -39,9 +39,20 @@
   {!endif}
 	</div>
 
+
+{!if related_faqs}
+	<hr>
+	<h2>{lang_related_faqs}</h2>
+	<ul class="uk-list uk-margin-small">
+		<!-- BEGIN related -->
+		<li class="uk-margin-small"><a href="{kwURL}">{kwQuestion}</a></li>
+		<!-- END related -->
+	</ul>
+{!endif}
+
 	<hr class="uk-margin-bottom-large">
-	{!if lang_helpful}
-	<form class="uk-form">
+{!if lang_helpful}
+	<form class="uk-form uk-panel uk-panel-box">
 		<input type="hidden" id="faqid" name="faqid" value="{id}">
 		<div id="faq-feedback" class="uk-margin-top">
 			<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
@@ -49,7 +60,7 @@
 			<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
 		</div>
 	</form>
-	{!endif}
+{!endif}
 
 	{!if lang_back_to_home}
 	<div class="uk-margin-large">

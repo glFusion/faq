@@ -1,7 +1,8 @@
 # FAQ Plugin ChangeLog
 
 ## v1.1.0
-  - Search feature
+  - Keyword system - allowing Related FAQs to now be displayed when FAQs share the same keywords
+  - Implemented a comprehensive search system into the plugin to allow weighted searches of FAQs
   - New silient edit mode
   - Properly escape author name on searches
 

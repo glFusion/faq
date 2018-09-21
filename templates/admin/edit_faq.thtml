@@ -47,6 +47,14 @@
 								<input style="width:100%;" class="required uk-form-width-xlarge" type="text" name="question" size="80" autofocus tabindex="1" value="{row_question}">
 							</div>
 						</div>
+
+						<div class="uk-form-row">
+							<label class="uk-form-label uk-text-bold">{lang_keywords}</label>
+							<div class="uk-form-controls style="text-align:top;">
+								<input type="text" name="keywords" id="keywords" tabindex="2" value="{row_keywords}">
+								<ul id="keyword-input"></ul>
+							</div>
+						</div>
 					</div>
 
 {!if !new_faq}
@@ -75,7 +83,7 @@
 							<button id="std" type="button" class="uk-button uk-button-success" tabindex="7" value="{html_editor}"  onclick="woff('answer');$('#visual').attr('class','uk-button');$('#std').attr('class','uk-button uk-button-success')">{html_editor}</button>
 						</div>
 {!endif}
-						<textarea class="uk-form-width-large texteditor required" tabindex="2" id="answer" name="answer" rows="24" style="width:100%;">{row_answer}</textarea>
+						<textarea class="uk-form-width-large texteditor required" tabindex="3" id="answer" name="answer" rows="24" style="width:100%;">{row_answer}</textarea>
 					</div>
 				</div>
 
@@ -129,6 +137,14 @@
 	</form>
 </div>
 <script>
+// assign tag editor to textarea - existing text will be used as initial tags
+$('#keywords').tagit({
+		availableTags: [{keyword_lookup}],
+		singleField:true,
+		singleFieldNode: $('#keyword-input'),
+		allowSpaces: true,
+		tabIndex:2
+});
 	var editor_type = 'faqeditor';
 	var lang_timer  = "{lang_timeout}";
 	var lastActivity = 0;

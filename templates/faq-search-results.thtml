@@ -34,8 +34,8 @@
 		<!-- BEGIN searchresults -->
 		<li class="uk-margin">
 			<a href="{faq_article_url}" class="uk-text-large uk-text-bold">
-				{search_question}
-			</a> ({relevance})
+				{search_question} {!if query_string} ({relevance}) {!endif}
+			</a>
 			<div>
 				{search_answer}
 			</div>
