@@ -344,7 +344,7 @@ function saveFaq()
     $owner_id = $_USER['uid'];
 
     if ( $faq_id == 0 ) {
-        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,draft,question,answer,owner_uid,last_updated) "
+        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,draft,question,answer,owner_uid,last_updated,keywords) "
                ." VALUES ("
                . $filter->prepareForDB($cat_id).","
                . (int) $draft .","
