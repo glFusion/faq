@@ -54,7 +54,7 @@
 {!if lang_helpful}
 	<form class="uk-form uk-panel uk-panel-box">
 		<input type="hidden" id="faqid" name="faqid" value="{id}">
-		<div id="faq-feedback" class="uk-margin-top">
+		<div id="faq-feedback" class="uk-margin-remove">
 			<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
 			<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
 			<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
