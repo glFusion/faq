@@ -2,11 +2,23 @@
 <div class="faq faq-article">
 
 	<h2>{cat_title}</h2>
-{!if lang_back_to_home}
+
+{!if !preview}
+	<ul class="uk-breadcrumb uk-text-truncate">
+		<li><a href="{site_url}/faq/index.php">{faq_title}</a></li>
+{!!if {src} == 'sr' !!}
+		<li><a href="{site_url}/faq/search.php?q={query_string}">{lang_search_results}</a></li>
+{!endif}
+		<li>{question}</li>
+	</ul>
+{!endif}
+
+{!if xxlang_back_to_home}
 	<a href="{return_url}">
 		<i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}
 	</a>
 {!endif}
+
 	<hr>
 
 {!if not_found}
@@ -22,16 +34,27 @@
 
 	<div class="uk-text-small uk-text-right">
 		{lang_last_updated}: {last_updated}
- {!if edit_link}
+  {!if edit_link}
 		<a class="uk-margin-left" href="{edit_link}" title="{lang_edit}"><i class="uk-icon uk-icon-pencil"></i></a>
- {!endif}
+  {!endif}
 	</div>
+
+
+{!if related_faqs}
+	<hr>
+	<h2>{lang_related_faqs}</h2>
+	<ul class="uk-list uk-margin-small">
+		<!-- BEGIN related -->
+		<li class="uk-margin-small"><a href="{kwURL}">{kwQuestion}</a></li>
+		<!-- END related -->
+	</ul>
+{!endif}
 
 	<hr class="uk-margin-bottom-large">
 {!if lang_helpful}
-	<form class="uk-form">
+	<form class="uk-form uk-panel uk-panel-box">
 		<input type="hidden" id="faqid" name="faqid" value="{id}">
-		<div id="faq-feedback" class="uk-margin-top">
+		<div id="faq-feedback" class="uk-margin-remove">
 			<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
 			<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
 			<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
@@ -39,11 +62,11 @@
 	</form>
 {!endif}
 
-{!if lang_back_to_home}
+	{!if lang_back_to_home}
 	<div class="uk-margin-large">
 		<a href="{return_url}"><i class="uk-icon uk-icon-arrow-left"></i>&nbsp;{lang_back_to_home}</a>
 	</div>
-{!endif}
+	{!endif}
 {!endif}
 </div>
 <script>

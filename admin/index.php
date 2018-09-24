@@ -317,6 +317,10 @@ function saveFaq()
     $answer     = $_POST['answer'];
     $draft      = (isset($_POST['draft']) ? 1 : 0);
 
+    $keywords   = $_POST['keywords'];
+
+//var_dump($_POST);exit;
+
     $_POST['draft'] = $draft;
 
     // form validation
@@ -340,14 +344,15 @@ function saveFaq()
     $owner_id = $_USER['uid'];
 
     if ( $faq_id == 0 ) {
-        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,draft,question,answer,owner_uid,last_updated) "
+        $sql = "INSERT INTO {$_TABLES['faq_questions']} (cat_id,draft,question,answer,owner_uid,last_updated,keywords) "
                ." VALUES ("
                . $filter->prepareForDB($cat_id).","
                . (int) $draft .","
                ."'".$filter->prepareForDB($question)."',"
                ."'".$filter->prepareForDB($answer)."',"
                . $filter->prepareForDB($owner_id).","
-               ."'".$filter->prepareForDB($last_updated)."'"
+               ."'".$filter->prepareForDB($last_updated)."',"
+               ."'".$filter->prepareForDB($keywords)."'"
                .");";
         $result = DB_query($sql);
         $faq_id = DB_insertId($result);
@@ -357,8 +362,12 @@ function saveFaq()
                ."draft=".(int) $draft.","
                ."question='".$filter->prepareForDB($question)."',"
                ."answer='".$filter->prepareForDB($answer)."',"
-               ."last_updated='".$filter->prepareForDB($last_updated)."'"
-               ." WHERE id=".(int) $faq_id;
+               ."keywords='".$filter->prepareForDB($keywords)."'";
+        if (!isset($_POST['silent_update'])) {
+            $sql .= ",last_updated='".$filter->prepareForDB($last_updated)."'";
+        }
+
+        $sql .= " WHERE id=".(int) $faq_id;
         $result = DB_query($sql);
     }
     PLG_itemSaved($faq_id,'faq');
@@ -400,16 +409,23 @@ function editFaq($data,$preview = false)
     $outputHandle = outputHandler::getInstance();
     $outputHandle->addLinkStyle($styleSheet);
 
+    // load tag editor
+    $outputHandle->addLinkStyle($_CONF['site_admin_url'].'/plugins/faq/js/jquery.tagit.css');
+    $outputHandle->addLinkStyle($_CONF['site_admin_url'].'/plugins/faq/js/tagit.ui-zendesk.css');
+    $outputHandle->addLinkScript($_CONF['site_admin_url'].'/plugins/faq/js/tag-it.min.js');
+
     $A['id']            = $data['id'];
     $A['cat_id']        = $data['cat_id'];
     $A['draft']         = $data['draft'];
     $A['last_updated']  = isset($data['last_updated']) ? $data['last_updated'] : $dt->toMySQL(true);
     $A['question']      = $data['question'];
     $A['answer']        = $data['answer'];
+    $A['keywords']      = $data['keywords'];
     $A['owner_uid']     = isset($data['owner_id']) ? $data['owner_uid'] : $_USER['uid'];
     $A['hits']          = isset($data['hits']) ? $data['hits'] : 0;
     $A['helpful_yes']   = isset($data['helpful_yes']) ? $data['helpful_yes'] : 0;
     $A['helpful_no']    = isset($data['helpful_no']) ? $data['helpful_no'] : 0;
+    $A['silent_update'] = isset($data['silent_update']) ? 1 : 0;
 
     if (isset($_POST['editor'])) {
         $editMode = COM_applyFilter($_POST['editor']);
@@ -423,6 +439,14 @@ function editFaq($data,$preview = false)
     if ($preview == true) {
         $previewTemplate = new Template ($_CONF['path'] . 'plugins/faq/templates');
         $previewTemplate->set_file('page','faq-article.thtml');
+
+        $previewTemplate->set_var('preview',true);
+
+        if (isset($_FAQ_CONF['faq_title']) && $_FAQ_CONF['faq_title'] != '') {
+            $previewTemplate->set_var('faq_title',$_FAQ_CONF['faq_title']);
+        } else {
+            $previewTemplate->set_var('faq_title',$LANG_FAQ['faq_title']);
+        }
 
         $dt = new \Date($A['last_updated'],$_USER['tzid']);
 
@@ -479,6 +503,8 @@ function editFaq($data,$preview = false)
         'lang_preview_help' => $LANG_FAQ['preview_help'],
         'lang_preview'      => $LANG_FAQ['preview'],
         'lang_faq_editor'   => $LANG_FAQ['faq_editor'],
+        'lang_silent_edit'  => $LANG_FAQ['silent_edit'],
+        'lang_keywords'     => $LANG_FAQ['keywords'],
         'visual_editor'     => $LANG_FAQ['visual'],
         'html_editor'       => $LANG_FAQ['html'],
         'faq_css'           => $styleSheet,
@@ -524,6 +550,10 @@ function editFaq($data,$preview = false)
     if ( $A['draft'] ) {
         $draftChecked = ' checked="checked" ';
     }
+    $silentChecked = '';
+    if ($A['silent_update']) {
+        $silentChecked = ' checked="checked" ';
+    }
 
     $filter = \sanitizer::getInstance();
     $AllowedElements = $filter->makeAllowedElements($_FAQ_CONF['allowed_html']);
@@ -536,6 +566,7 @@ function editFaq($data,$preview = false)
 
     $question = $filter->editableText($A['question']);
     $answer   = $filter->editableText($A['answer']);
+    $keywords = $filter->editableText($A['keywords']);
 
     $T->set_var(array(
         'row_id'            => $A['id'],
@@ -545,16 +576,33 @@ function editFaq($data,$preview = false)
         'row_lastupdated'   => $A['last_updated'],
         'row_question'      => $question,
         'row_answer'        => $answer,
+        'row_keywords'      => $keywords,
         'row_hits'          => $A['hits'],
         'row_helpful_yes'   => $A['helpful_yes'],
         'row_helpful_no'    => $A['helpful_no'],
         'draft_checked'     => $draftChecked,
+        'silent_checked'    => $silentChecked,
         'row_owner_uid'     => $A['owner_uid'],
         'user_select'       => $user_select,
         'category_select'   => $category_select,
         'sec_token_name'    => CSRF_TOKEN,
         'sec_token'         => SEC_createToken(),
     ));
+
+    // build unique list of existing tags
+    $keywordArray = array();
+    $result = DB_query("SELECT keywords FROM {$_TABLES['faq_questions']}");
+    while (($row = DB_fetchArray($result,false)) != null ) {
+        if (!empty($row['keywords'])) {
+            $keywordArray = array_merge($keywordArray,explode(',',$row['keywords']));
+        }
+    }
+    $keywordArray = array_unique($keywordArray);
+    array_walk_recursive($keywordArray, function(&$item, $key) {
+        $item = addslashes($item);
+    });
+    $keywords = "'".implode("','",$keywordArray)."'";
+    $T->set_var('keyword_lookup',$keywords);
 
     PLG_templateSetVars('faq_editor',$T);
 
@@ -993,6 +1041,7 @@ switch ( $cmd ) {
         $A['hits']          = 0;
         $A['helpful_yes']   = 0;
         $A['helpful_no']    = 0;
+        $A['keywords']      = '';
         $page = editFaq($A,false);
         $pageTitle = $LANG_FAQ['edit_faq'];
         break;

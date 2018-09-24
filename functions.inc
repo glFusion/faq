@@ -222,13 +222,14 @@ function plugin_dopluginsearch_faq($query, $datestart, $dateend, $topic, $type, 
     $sql .= " WHERE draft=0 " . $permSQL;
 
     if (!empty ($author)) {
-        $sql .= " AND (owner_uid = '$author') ";
+        $sql .= " AND (owner_uid = '".DB_escapeString($author)."') ";
     }
 
     $search = new SearchCriteria('faq', $LANG_FAQ['plugin_name']);
     $columns = array('question','answer');
     $sql .= $search->getDateRangeSQL('AND', '(UNIX_TIMESTAMP(last_updated))', $datestart, $dateend);
     list($sql,$ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
+
     $search->setSQL($sql);
     $search->setFTSQL($ftsql);
     $search->setRank(3);
@@ -660,7 +661,7 @@ function faq_parse($str, $postmode='text')
         $format->setAction('answer');
         $format->setAllowedHTML($_FAQ_CONF['allowed_html']);
         $format->setType($postmode);
-        $format->enableCache(false);
+//        $format->enableCache(false);
         $format->setProcessBBCode(false);
         $format->setParseURLs(false);
         $format->setConvertPre(true);

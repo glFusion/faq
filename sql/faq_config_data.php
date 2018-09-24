@@ -119,13 +119,25 @@ $faqConfigData = array(
         'group' => 'faq'
     ),
     array(
+        'name' => 'enable_search',
+        'default_value' => true,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 80,
+        'set' => TRUE,
+        'group' => 'faq'
+    ),
+
+    array(
         'name' => 'default_edit_mode',
         'default_value' => 'wysiwyg',
         'type' => 'select',
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => 9,
-        'sort' => 80,
+        'sort' => 90,
         'set' => TRUE,
         'group' => 'faq'
     ),
@@ -136,7 +148,7 @@ $faqConfigData = array(
         'subgroup' => 0,
         'fieldset' => 0,
         'selection_array' => NULL,
-        'sort' => 90,
+        'sort' => 100,
         'set' => TRUE,
         'group' => 'faq'
     ),
