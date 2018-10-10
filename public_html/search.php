@@ -150,7 +150,7 @@ function searchFAQ($query, $T = null)
     $categorySQL = array();
     $urlSQL = array();
 
-    $stemmer = new Libs_WordStemmer();
+    $stemmer = new \Libs_WordStemmer();
 
     /** Matching full occurences **/
     if (count($keywords) > 1 && !empty($escQuery)) {
@@ -161,7 +161,6 @@ function searchFAQ($query, $T = null)
     /** Matching Keywords **/
     foreach($keywords as $key) {
         if ( !empty($key)) {
-//            $key = $stemmer->stem($key);
             $questionSQL[] = "if (question LIKE '%".DB_escapeString($key)."%',{$scoreQuestionKeyword},0)";
             $answerSQL[] = "if (answer LIKE '%".DB_escapeString($key)."%',{$scoreAnswerKeyword},0)";
         }
@@ -171,8 +170,10 @@ function searchFAQ($query, $T = null)
     foreach($keywords as $key) {
         if ( !empty($key)) {
             $key = $stemmer->stem($key);
-            $questionSQL[] = "if (question LIKE '%".DB_escapeString($key)."%',{$scoreStemmerQuestion},0)";
-            $answerSQL[] = "if (answer LIKE '%".DB_escapeString($key)."%',{$scoreStemmerAnswer},0)";
+            if (!in_array($key,$keywords)) {
+                $questionSQL[] = "if (question LIKE '%".DB_escapeString($key)."%',{$scoreStemmerQuestion},0)";
+                $answerSQL[] = "if (answer LIKE '%".DB_escapeString($key)."%',{$scoreStemmerAnswer},0)";
+            }
         }
     }
 
