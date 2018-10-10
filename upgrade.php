@@ -37,6 +37,9 @@ function faq_upgrade()
         case '1.0.2' :
             DB_query("ALTER TABLE `{$_TABLES['faq_questions']}` ADD COLUMN `keywords` VARCHAR(200) NULL DEFAULT NULL AFTER `hits`;",1);
 
+        case '1.1.0' :
+            // no changes
+
         default:
             DB_query("UPDATE {$_TABLES['plugins']} SET pi_version='".$_FAQ_CONF['pi_version']."',pi_gl_version='".$_FAQ_CONF['gl_version']."' WHERE pi_name='faq' LIMIT 1");
             break;
