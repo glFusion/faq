@@ -1,5 +1,9 @@
 # FAQ Plugin ChangeLog
 
+## v1.1.1
+  - Fixed PHP 7 compatibility issue
+  - Removed duplicate queries when creating stemmer search
+
 ## v1.1.0
   - Keyword system - allowing Related FAQs to now be displayed when FAQs share the same keywords
   - Implemented a comprehensive search system into the plugin to allow weighted searches of FAQs
