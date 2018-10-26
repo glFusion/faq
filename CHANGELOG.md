@@ -1,5 +1,8 @@
 # FAQ Plugin ChangeLog
 
+## v1.1.2
+  - Updated Formatter() calls to be compatible with glFusion v2 development code
+
 ## v1.1.1
   - Fixed PHP 7 compatibility issue
   - Removed duplicate queries when creating stemmer search
