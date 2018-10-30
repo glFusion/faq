@@ -52,12 +52,14 @@
 
 	<hr class="uk-margin-bottom-large">
 {!if lang_helpful}
-	<form class="uk-form uk-panel uk-panel-box">
+	<form class="uk-form uk-form-horizontal uk-panel uk-panel-box">
 		<input type="hidden" id="faqid" name="faqid" value="{id}">
-		<div id="faq-feedback" class="uk-margin-remove">
-			<span class="uk-text-large uk-margin-right">{lang_helpful}</span>
-			<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
-			<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
+		<div id="faq-feedback" class="uk-form-row">
+			<label class="uk-form-label uk-text-large">{lang_helpful}</label>
+			<div class="uk-form-controls">
+				<button id="helpful_yes" class="uk-button uk-button-large uk-button-success">{lang_yes}</button>
+				<button id="helpful_no" class="uk-button uk-button-danger uk-button-large">{lang_no}</button>
+			</div>
 		</div>
 	</form>
 {!endif}

@@ -1,5 +1,9 @@
 # FAQ Plugin ChangeLog
 
+## v1.1.2
+  - Improved FAQ article layout for mobile devices
+  - Updated Formatter() calls to be compatible with glFusion v2 development code
+
 ## v1.1.1
   - Fixed PHP 7 compatibility issue
   - Removed duplicate queries when creating stemmer search

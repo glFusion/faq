@@ -661,7 +661,6 @@ function faq_parse($str, $postmode='text')
         $format->setAction('answer');
         $format->setAllowedHTML($_FAQ_CONF['allowed_html']);
         $format->setType($postmode);
-//        $format->enableCache(false);
         $format->setProcessBBCode(false);
         $format->setParseURLs(false);
         $format->setConvertPre(true);
@@ -687,8 +686,6 @@ function faq_parse($str, $postmode='text')
     if ($postmode != 'html') {
         $bbcode->addParser(array('block','inline','link','listitem'), 'faq_nl2br');
     }
-
-//    $bbcode->addParser (array('block','inline','listitem'), array ($filter, 'linkify'));
 
     $bbcode->addCode ('code', 'usecontent?', 'do_faq_code', array ('usecontent_param' => 'default'),
                       'code', array('listitem', 'block', 'inline', 'quote'), array ('link'));

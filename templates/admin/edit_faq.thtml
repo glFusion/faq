@@ -60,13 +60,23 @@
 {!if !new_faq}
 					<div class="uk-width-medium-1-4">
 						<div class="uk-form-row">
-							{lang_hits}: {row_hits}
+							<label class="uk-form-label uk-text-bold">
+								{lang_hits}
+							</label>
+							{row_hits}
 						</div>
 						<div class="uk-form-row">
-							{lang_helpful_yes}: <span id="helpful-yes">{row_helpful_yes}</span>&nbsp;&nbsp;&nbsp;{lang_helpful_no}: <span id="helpful-no">{row_helpful_no}</span>
+							<label class="uk-form-label uk-text-bold">{lang_helpful_yes}</label>
+							<span id="helpful-yes">{row_helpful_yes}</span>&nbsp;&nbsp;&nbsp;<label class="uk-form-label uk-text-bold">{lang_helpful_no}:</label> <span id="helpful-no">{row_helpful_no}</span>
 						</div>
 						<div class="uk-form-row">
 							<button id="reset-helpful" class="uk-button uk-button-primary">{lang_reset_stats}</button>
+						</div>
+						<div class="uk-form-row uk-margin-bottom">
+							<label class="uk-form-label uk-text-bold">
+								{lang_silent_edit}
+							</label>
+							<input class="uk-text-right" type="checkbox" name="silent_update" id="silent_update" tabindex="6" {silent_checked}>
 						</div>
 					</div>
 {!endif}
@@ -111,16 +121,6 @@
 	{# end save side bar #}
 
 		<div class="uk-form-row uk-margin-top">
-
-{!if !new_faq}
-			<div class="uk-form-row uk-margin-bottom">
-				<label class="uk-form-label uk-text-bold">
-					{lang_silent_edit}
-				</label>
-				<input class="uk-text-right" type="checkbox" name="silent_update" id="silent_update" tabindex="6" {silent_checked}>
-			</div>
-{!endif}
-
 			<div class="uk-grid">
 				<div class="uk-width-small-3-4">
 					<button onclick="actionClick('save');" type="submit" class="uk-button uk-button-success button" id="save" name="save" value="x">{lang_save}</button>
