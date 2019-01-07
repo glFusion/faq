@@ -792,7 +792,7 @@ function saveCategory()
 
     COM_setMsg( $LANG_FAQ['category_saved'], 'warning' );
 
-    $c = glFusion\Cache::getInstance();
+    $c = \glFusion\Cache::getInstance();
     $c->deleteItemsByTags(array('faq','faqindex','menu','whatsnew'));
 
     return listCategories();
@@ -802,7 +802,7 @@ function deleteCategory()
 {
     global $_CONF, $_TABLES;
 
-    $c = glFusion\Cache::getInstance();
+    $c = \glFusion\Cache::getInstance();
 
     $del_ids = $_POST['cat_ids'];
     if ( is_array($del_ids) && count($del_ids) > 0 ) {
@@ -831,7 +831,7 @@ function deleteSingleCat()
 {
     global $_CONF, $_TABLES, $LANG_FAQ;
 
-    $c = glFusion\Cache::getInstance();
+    $c = \glFusion\Cache::getInstance();
 
     $cat_id = 0;
 
@@ -865,7 +865,7 @@ function deleteFaq()
 {
     global $_CONF, $_TABLES;
 
-    $c = glFusion\Cache::getInstance();
+    $c = \glFusion\Cache::getInstance();
 
     $del_ids = $_POST['faq_ids'];
     if ( is_array($del_ids) && count($del_ids) > 0 ) {
@@ -887,7 +887,7 @@ function deleteSingleFaq()
 {
     global $_CONF, $_TABLES, $LANG_FAQ;
 
-    $c = glFusion\Cache::getInstance();
+    $c = \glFusion\Cache::getInstance();
 
     $faq_id = 0;
 
