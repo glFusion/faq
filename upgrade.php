@@ -43,6 +43,9 @@ function faq_upgrade()
         case '1.1.1' :
             // no changes
 
+        case '1.1.2' :
+            // no DB or config changes
+
         default:
             DB_query("UPDATE {$_TABLES['plugins']} SET pi_version='".$_FAQ_CONF['pi_version']."',pi_gl_version='".$_FAQ_CONF['gl_version']."' WHERE pi_name='faq' LIMIT 1");
             break;
