@@ -306,6 +306,7 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
             $target = '';
             $target_window = '';
             $skip = 0;
+            $link = '';
 
             $autotag['parm2'] = str_replace("&nbsp;",' ',$autotag['parm2']);
 
@@ -349,8 +350,8 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
                     $caption = $faqData['title'];
                 }
                 $link = '<a href="' . $faqData['url'] . '" ' . $target . ' >' . $caption . '</a>';
-                $content = str_replace ($autotag['tagstr'], $link, $content);
             }
+            $content = str_replace ($autotag['tagstr'], $link, $content);
             return $content;
         }
     }

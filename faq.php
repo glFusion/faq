@@ -9,7 +9,7 @@
 * @license GNU General Public License version 2 or later
 *     http://www.opensource.org/licenses/gpl-license.php
 *
-*  Copyright (C) 2017-2018 by the following authors:
+*  Copyright (C) 2017-2019 by the following authors:
 *   Mark R. Evans   mark AT glfusion DOT org
 *
 */
@@ -24,7 +24,7 @@ global $_DB_table_prefix, $_TABLES;
 
 $_FAQ_CONF['pi_name']            = 'faq';
 $_FAQ_CONF['pi_display_name']    = 'FAQ';
-$_FAQ_CONF['pi_version']         = '1.1.2';
+$_FAQ_CONF['pi_version']         = '1.1.3';
 $_FAQ_CONF['gl_version']         = '1.7.5';
 $_FAQ_CONF['pi_url']             = 'https://www.glfusion.org/';
 
