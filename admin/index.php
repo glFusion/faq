@@ -28,7 +28,6 @@ if (!SEC_hasRights('faq.admin')) {
     echo $display;
     exit;
 }
-
 USES_lib_admin();
 
 /*
@@ -672,7 +671,7 @@ function editCategory($data)
     while ($row = DB_fetchArray($result)) {
         if ( $A['sort_order'] != $order ) {
             $label = $row['title'];
-            $test_order = $order + 10;
+            $test_order = $order + 5;
             $sort_select .= '<option value="' . $test_order . '"' . ($A['sort_order'] == $test_order ? ' selected="selected"' : '') . '>' . $label . '</option>';
         }
         $order += 10;
@@ -714,7 +713,7 @@ function saveCategory()
     $cat_id      = isset($_POST['cat_id']) ? (int) COM_applyFilter($_POST['cat_id'],true) : -1;
     $title       = isset($_POST['title']) ? $_POST['title'] : '';
     $description = isset($_POST['description']) ? $_POST['description'] : '';
-    $sort_order  = isset($_POST['sort_order']) ? (int) COM_applyFilter($_POST['sort_order'],true) + 1 : 0;
+    $sort_order  = isset($_POST['sort_order']) ? (int) COM_applyFilter($_POST['sort_order'],true) : 0;
     $owner_id    = isset($_POST['owner_id']) ? (int) COM_applyFilter($_POST['owner_id'],true) : 0;
     $group_id    = isset($_POST['group_id']) ? (int) COM_applyFilter($_POST['group_id'],true) : 0;
 
@@ -756,7 +755,6 @@ function saveCategory()
 
     $dt = new Date('now',$_CONF['timezone']);
     $last_updated = $dt->toMySQL(true);
-
     if ( $cat_id == 0 ) {
         $sql = "INSERT INTO {$_TABLES['faq_categories']} (title,description,sort_order,last_updated,owner_id,group_id,perm_owner,perm_group,perm_members,perm_anon) "
                ." VALUES ("
