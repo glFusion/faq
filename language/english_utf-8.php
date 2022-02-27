@@ -9,10 +9,14 @@
 * @license GNU General Public License version 2 or later
 *     http://www.opensource.org/licenses/gpl-license.php
 *
-*  Copyright (C) 2017-2018 by the following authors:
+*  Copyright (C) 2017-2022 by the following authors:
 *   Mark R. Evans   mark AT glfusion DOT org
 *
 */
+
+if (!defined ('GVERSION')) {
+    die ('This file can not be used on its own.');
+}
 
 $LANG_FAQ = array (
     'plugin'            => 'faq',
@@ -72,6 +76,7 @@ $LANG_FAQ = array (
     'helpful_yes'           => 'Helpful',
     'html'                  => 'HTML',
     'id'                    => 'FAQ Id',
+    'keywords'              => 'Keywords',
     'last_updated'          => 'Last Updated',
     'no'                    => 'NO',
     'no_cat_or_faq'         => 'No Frequently Asked Questions are available at this time.',
@@ -79,14 +84,19 @@ $LANG_FAQ = array (
     'no_cats_admin'         => 'No Categories exist - Please create a Category before creating a FAQ',
     'no_faq_found'          => 'The requested FAQ was not found. Please return to the FAQ Home and try your selection again.',
     'no_faqs'               => 'No FAQs for this Category',
+    'no_results_found'      => 'No Results Found',
     'number_of_questions'   => 'Questions',
     'owner'                 => 'Category Owner',
     'permissions'           => 'Permissions',
     'preview'               => 'Preview',
     'preview_help'          => 'Select the <strong>Preview button</strong> to refresh the preview display',
     'question'              => 'Question',
+    'related_faqs'          => 'Related FAQs',
     'reset_stats'           => 'Reset Helpful Stats',
     'save'		            => 'Save',
+    'search_results'        => 'Search Results',
+    'search_the'            => 'Search the',
+    'silent_edit'           => 'Silent Edit',
     'sort_order'            => 'Order',
     'thank_you'             => 'Thank you for your feedback!',
     'title'                 => 'Title',
@@ -115,6 +125,7 @@ $LANG_confignames['faq'] = array(
     'max_columns_category' => 'Max Category Columns in "Category in Columns" View',
     'max_columns_question' => 'Max Question Columns "Single Category" View',
     'default_edit_mode'   => 'Default Editor',
+    'enable_search'       => 'Enable Search',
 );
 
 $LANG_configsubgroups['faq'] = array(
@@ -127,16 +138,16 @@ $LANG_fs['faq'] = array(
     'fs_perm_defaults' => 'Permission Defaults',
 );
 
-$LANG_configselects['faq'] = array(
-    0  => array('True' => 1, 'False' => 0 ),
-    1  => array('Navigation Blocks' => 0, 'Footer Blocks' => 1, 'All Blocks' => 2, 'No Blocks' => 3),
-    2  => array('Yes' => 1, 'No' => 0 ),
-    3  => array('No Centerblock' => -1, 'Top of Page' => 1, 'After Featured Story' => 2, 'Bottom of Page' => 3),
-    4  => array('Question' => 'question', 'Date' => 'last_updated'),
-    5  => array('Descending' => 'DESC', 'Ascending' => 'ASC'),
-    6  => array('No access' => 0, 'Read-Only' => 2, 'Read-Write' => 3),
-    7  => array('Category in Columns' => 0, 'Single Category Column' => 1),
-    8  => array('4' => 4, '3' => 3, '2' => 2, '1' => 1),
-    9  => array('WYSIWYG' => 'wysiwyg', 'HTML' => 'html'),
+$LANG_configSelect['faq'] = array(
+    0  => array(1 => 'True', 0 => 'False'),
+    1  => array(0 => 'Navigation Blocks', 1 => 'Footer Blocks', 2 => 'All Blocks', 3 => 'No Blocks'),
+    2  => array(1 => 'Yes', 0 => 'No'),
+    3  => array(-1 => 'No Centerblock', 1 => 'Top of Page', 2 => 'After Featured Story', 3 => 'Bottom of Page'),
+    4  => array('question' => 'Question', 'last_updated' => 'Date'),
+    5  => array('DESC' => 'Descending', 'ASC' => 'Ascending'),
+    6  => array(0 => 'No access', 2 => 'Read-Only', 3 => 'Read-Write'),
+    7  => array(0 => 'Category in Columns', 1 => 'Single Category Column'),
+    8  => array(4 => '4', 3 => '3', 2 => '2', 1 => '1'),
+    9  => array('wysiwyg' => 'WYSIWYG', 'html' => 'HTML'),
 );
 ?>

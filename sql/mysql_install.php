@@ -35,16 +35,17 @@ $_SQL['faq_categories'] = "CREATE TABLE {$_TABLES['faq_categories']} (
 ";
 
 $_SQL['faq_questions'] = "CREATE TABLE {$_TABLES['faq_questions']} (
-    id int(15) NOT NULL auto_increment,
-    cat_id int(15),
-    draft tinyint(1) NOT NULL default '0',
-    last_updated datetime default NULL,
-    question text,
-    answer text,
-    owner_uid mediumint(8) unsigned NOT NULL default '1',
-    helpful_yes mediumint(8) unsigned NOT NULL default '0',
-    helpful_no mediumint(8) unsigned NOT NULL default '0',
-    hits mediumint(8) unsigned NOT NULL default 0,
+    `id` int(15) NOT NULL auto_increment,
+    `cat_id` int(15),
+    `draft` tinyint(1) NOT NULL default '0',
+    `last_updated` datetime default NULL,
+    `question` text,
+    `answer` text,
+    `owner_uid` mediumint(8) unsigned NOT NULL default '1',
+    `helpful_yes` mediumint(8) unsigned NOT NULL default '0',
+    `helpful_no` mediumint(8) unsigned NOT NULL default '0',
+    `hits` mediumint(8) unsigned NOT NULL default 0,
+    `keywords` varchar(200) NULL DEFAULT NULL,
     PRIMARY KEY  (id),
 	INDEX `cat_id` (`cat_id`)
 ) ENGINE=MyISAM

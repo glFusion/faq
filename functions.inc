@@ -9,7 +9,7 @@
 * @license GNU General Public License version 2 or later
 *     http://www.opensource.org/licenses/gpl-license.php
 *
-*  Copyright (C) 2017-2018 by the following authors:
+*  Copyright (C) 2017-2022 by the following authors:
 *   Mark R. Evans   mark AT glfusion DOT org
 *
 */
@@ -30,6 +30,14 @@ if (file_exists ($langfile)) {
     include_once $langfile;
 } else {
     include_once $_CONF['path'] . 'plugins/faq/language/english_utf-8.php';
+}
+
+if (version_compare(GVERSION,'2.0.0','lt')) {
+    if (isset($LANG_configSelect['faq']) && !isset($LANG_configselects['faq'])) {
+        foreach ($LANG_configSelect['faq'] AS $cfgItem) {
+            $LANG_configselects['faq'][] = array_flip($cfgItem);
+        }
+    }
 }
 
 /*
@@ -222,13 +230,14 @@ function plugin_dopluginsearch_faq($query, $datestart, $dateend, $topic, $type, 
     $sql .= " WHERE draft=0 " . $permSQL;
 
     if (!empty ($author)) {
-        $sql .= " AND (owner_uid = '$author') ";
+        $sql .= " AND (owner_uid = '".DB_escapeString($author)."') ";
     }
 
     $search = new SearchCriteria('faq', $LANG_FAQ['plugin_name']);
     $columns = array('question','answer');
     $sql .= $search->getDateRangeSQL('AND', '(UNIX_TIMESTAMP(last_updated))', $datestart, $dateend);
     list($sql,$ftsql) = $search->buildSearchSQL($keyType, $query, $columns, $sql);
+
     $search->setSQL($sql);
     $search->setFTSQL($ftsql);
     $search->setRank(3);
@@ -305,6 +314,7 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
             $target = '';
             $target_window = '';
             $skip = 0;
+            $link = '';
 
             $autotag['parm2'] = str_replace("&nbsp;",' ',$autotag['parm2']);
 
@@ -348,8 +358,8 @@ function plugin_autotags_faq($op, $content = '', $autotag = '')
                     $caption = $faqData['title'];
                 }
                 $link = '<a href="' . $faqData['url'] . '" ' . $target . ' >' . $caption . '</a>';
-                $content = str_replace ($autotag['tagstr'], $link, $content);
             }
+            $content = str_replace ($autotag['tagstr'], $link, $content);
             return $content;
         }
     }
@@ -660,7 +670,6 @@ function faq_parse($str, $postmode='text')
         $format->setAction('answer');
         $format->setAllowedHTML($_FAQ_CONF['allowed_html']);
         $format->setType($postmode);
-        $format->enableCache(false);
         $format->setProcessBBCode(false);
         $format->setParseURLs(false);
         $format->setConvertPre(true);
@@ -686,8 +695,6 @@ function faq_parse($str, $postmode='text')
     if ($postmode != 'html') {
         $bbcode->addParser(array('block','inline','link','listitem'), 'faq_nl2br');
     }
-
-//    $bbcode->addParser (array('block','inline','listitem'), array ($filter, 'linkify'));
 
     $bbcode->addCode ('code', 'usecontent?', 'do_faq_code', array ('usecontent_param' => 'default'),
                       'code', array('listitem', 'block', 'inline', 'quote'), array ('link'));
