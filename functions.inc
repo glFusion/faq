@@ -9,7 +9,7 @@
 * @license GNU General Public License version 2 or later
 *     http://www.opensource.org/licenses/gpl-license.php
 *
-*  Copyright (C) 2017-2018 by the following authors:
+*  Copyright (C) 2017-2022 by the following authors:
 *   Mark R. Evans   mark AT glfusion DOT org
 *
 */
@@ -30,6 +30,14 @@ if (file_exists ($langfile)) {
     include_once $langfile;
 } else {
     include_once $_CONF['path'] . 'plugins/faq/language/english_utf-8.php';
+}
+
+if (version_compare(GVERSION,'2.0.0','lt')) {
+    if (isset($LANG_configSelect['faq']) && !isset($LANG_configselects['faq'])) {
+        foreach ($LANG_configSelect['faq'] AS $cfgItem) {
+            $LANG_configselects['faq'][] = array_flip($cfgItem);
+        }
+    }
 }
 
 /*
