@@ -1,8 +1,10 @@
 # FAQ Plugin ChangeLog
 
 ## v1.1.3
-  - Blank auto tags the user does not have permission to see.
+  - Updated style.css to use better font-weigth on FAQ answers
+  - Blank / hide auto tags the user does not have permission to see.
   - Updated Polish Translation
+  - New Czech Translation
 
 ## v1.1.2
   - Improved FAQ article layout for mobile devices

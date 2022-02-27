@@ -26,7 +26,7 @@ $_FAQ_CONF['pi_name']            = 'faq';
 $_FAQ_CONF['pi_display_name']    = 'FAQ';
 $_FAQ_CONF['pi_version']         = '1.1.3';
 $_FAQ_CONF['gl_version']         = '1.7.5';
-$_FAQ_CONF['pi_url']             = 'https://www.glfusion.org/';
+$_FAQ_CONF['pi_url']             = 'https://www.glfusion.org';
 
 $_TABLES['faq_categories']       = $_DB_table_prefix . 'faq_categories';
 $_TABLES['faq_questions']        = $_DB_table_prefix . 'faq_questions';
