@@ -156,15 +156,15 @@ $LANG_configselects['faq'] = array(
 );
 
 $LANG_configSelect['faq'] = array(
-    0 => array(1=>'Włącz', 0=>'Wyłacz'),
-    1 => array(0=>'Bloki nawigacyjne', 1=>'Stopka', 2=>'Wszystkie bloki', 3=>'Brak bloków'),
-    2 => array(1=>'Tak', 0=>'Nie'),
-    3 => array(-1=>'Bez bloku centralnego', 1=>'Na górze strony', 2=>'Po wyróżnionym artykule', 3=>'Dół strony'),
-    4 => array('question'=>'Pytanie', 'last_updated'=>'Data'),
-    5 => array('DESC'=>'Malejąco', 'ASC'=>'Rosnąco'),
-    6 => array(0=>'Brak dostępu', 2=>'Tylko odczyt', 3=>'Odczyt i zapis'),
-    7 => array(0=>'Kategoria w kolumnach', 1=>'Kolumna pojedynczej kategorii'),
-    8 => array(4=>'4', 3=>'3', 2=>'2', 1=>'1'),
-    9 => array('wysiwyg'=>'WYSIWYG', 'html'=>'HTML')
+    0  => array(1=>'Włącz', 0=>'Wyłacz'),
+    1  => array(0=>'Bloki nawigacyjne', 1=>'Stopka', 2=>'Wszystkie bloki', 3=>'Brak bloków'),
+    2  => array(1=>'Tak', 0=>'Nie'),
+    3  => array(-1=>'Bez bloku centralnego', 1=>'Na górze strony', 2=>'Po wyróżnionym artykule', 3=>'Dół strony'),
+    4  => array('question'=>'Pytanie', 'last_updated'=>'Data'),
+    5  => array('DESC'=>'Malejąco', 'ASC'=>'Rosnąco'),
+    6  => array(0=>'Brak dostępu', 2=>'Tylko odczyt', 3=>'Odczyt i zapis'),
+    7  => array(0=>'Kategoria w kolumnach', 1=>'Kolumna pojedynczej kategorii'),
+    8  => array(4=>'4', 3=>'3', 2=>'2', 1=>'1'),
+    9  => array('wysiwyg'=>'WYSIWYG', 'html'=>'HTML'),
 );
 ?>
